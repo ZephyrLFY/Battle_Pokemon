@@ -2,6 +2,7 @@
 #define WELCOME_H
 
 #include <QDialog>
+#include <QDebug>
 
 namespace Ui {
 class welcome;

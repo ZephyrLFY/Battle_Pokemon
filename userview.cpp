@@ -1,11 +1,13 @@
 #include "userview.h"
 #include "ui_userview.h"
+#include "connection.h"
 
 Userview::Userview(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::Userview)
 {
     ui->setupUi(this);
+    //Log loger;
     model = new QSqlTableModel(this);
     model->setTable("player");
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);

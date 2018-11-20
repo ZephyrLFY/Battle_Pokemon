@@ -1,7 +1,6 @@
 #include "userin.h"
 #include "ui_userin.h"
-#include "connection.h"
-#include <QDebug>
+#include <QSqlQuery>
 
 UserIn::UserIn(QWidget *parent) :
     QDialog(parent),
@@ -17,19 +16,10 @@ UserIn::~UserIn()
 
 void UserIn::on_loginBtn_clicked()
 {
-    extern Log log;
-    QSqlQuery query;
-    QString name = ui->usrLineEdit->text();
-    QString pwd = log.searchPwd(name);
-    if(pwd == ui->pwdLineEdit->text())
-    {
-        query.prepare("update player set alive = ? where ID = ?");
-        query.addBindValue(1);
-        query.addBindValue(name);
-        query.exec();
-        accept();
-    }
-    else if(pwd == "NULL")
+    extern udpReceiver interact;
+    interact.sendMsg(ui->usrLineEdit->text());
+    interact.sendMsg(ui->pwdLineEdit->text());
+    if(interact.updating() == 1)
     {
         QMessageBox::warning(this, tr("警告！"),
                     tr("不存在该用户"),
@@ -38,7 +28,7 @@ void UserIn::on_loginBtn_clicked()
         ui->pwdLineEdit->clear();
         ui->usrLineEdit->setFocus();
     }
-    else
+    else if(interact.updating() == 0)
     {
         QMessageBox::warning(this, tr("警告！"),
                     tr("密码错误！"),
@@ -46,4 +36,6 @@ void UserIn::on_loginBtn_clicked()
         ui->pwdLineEdit->clear();
         ui->pwdLineEdit->setFocus();
     }
+    else
+        accept();
 }

@@ -17,6 +17,8 @@ welcome::~welcome()
 
 void welcome::on_loginBtn_clicked()
 {
+    extern udpReceiver interact;
+    interact.whatToDo(1);
     UserIn dlg;
     if(dlg.exec() == QDialog::Accepted)
     {
@@ -26,6 +28,8 @@ void welcome::on_loginBtn_clicked()
 
 void welcome::on_logupBtn_clicked()
 {
+    extern udpReceiver interact;
+    interact.whatToDo(2);
     Newuser dlg;
     if(dlg.exec() == QDialog::Accepted)
     {

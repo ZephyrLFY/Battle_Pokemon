@@ -17,14 +17,11 @@ Newuser::~Newuser()
 
 void Newuser::on_loginBtn_clicked()
 {
-    extern Log log;
-    QString name = ui->usrLineEdit->text();
-    QString pwd = ui->pwdLineEdit->text();
-    if(log.addNewusr(name,pwd))
-    {
+    extern udpReceiver interact;
+    interact.sendMsg(ui->usrLineEdit->text());
+    interact.sendMsg(ui->pwdLineEdit->text());
+    if(interact.updating())
         accept();
-        log.addPokemon(name);
-    }
     else
     {
         QMessageBox::warning(this, tr("警告！"),

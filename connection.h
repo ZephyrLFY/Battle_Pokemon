@@ -5,6 +5,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QApplication>
+#include "udpreceiver.h"
 
 class Log : public QObject
 {

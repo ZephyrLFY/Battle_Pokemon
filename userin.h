@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QMessageBox>
+#include "udpreceiver.h"
 
 namespace Ui {
 class UserIn;
