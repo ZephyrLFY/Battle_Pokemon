@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QMessageBox>
+#include <QtNetwork>
 
 namespace Ui {
 class Newuser;
@@ -19,8 +20,13 @@ public:
 private slots:
     void on_loginBtn_clicked();
 
+    void dealDatagram();
+
 private:
     Ui::Newuser *ui;
+    QUdpSocket *sender;
+    QUdpSocket *receiver;
+    bool flag;
 };
 
 #endif // NEWUSER_H

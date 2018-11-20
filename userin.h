@@ -3,7 +3,8 @@
 
 #include <QDialog>
 #include <QMessageBox>
-#include "udpreceiver.h"
+#include <QSqlQuery>
+#include <QtNetwork>
 
 namespace Ui {
 class UserIn;
@@ -20,8 +21,13 @@ public:
 private slots:
     void on_loginBtn_clicked();
 
+    void dealDatagram();
+
 private:
     Ui::UserIn *ui;
+    QUdpSocket *sender;
+    QUdpSocket *receiver;
+    int tOrF = 3;
 };
 
 #endif // USERIN_H

@@ -1,12 +1,17 @@
 #include "userin.h"
 #include "ui_userin.h"
-#include <QSqlQuery>
+#include "udpreceiver.h"
 
 UserIn::UserIn(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::UserIn)
 {
     ui->setupUi(this);
+    sender = new QUdpSocket(this);
+    receiver = new QUdpSocket(this);
+    receiver->bind(45454,QUdpSocket::ShareAddress);
+    connect(receiver,SIGNAL(readyRead()),
+    this,SLOT(dealDatagram()));
 }
 
 UserIn::~UserIn()
@@ -14,12 +19,23 @@ UserIn::~UserIn()
     delete ui;
 }
 
+void UserIn::dealDatagram()
+{
+    while(receiver->hasPendingDatagrams())
+    {
+       QByteArray datagram;
+       datagram.resize(receiver->pendingDatagramSize());
+       receiver->readDatagram(datagram.data(),datagram.size());
+       QString flag(datagram);
+       tOrF = flag.toInt();
+    }
+}
+
 void UserIn::on_loginBtn_clicked()
 {
-    extern udpReceiver interact;
-    interact.sendMsg(ui->usrLineEdit->text());
-    interact.sendMsg(ui->pwdLineEdit->text());
-    if(interact.updating() == 1)
+    sender->writeDatagram(ui->usrLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
+    sender->writeDatagram(ui->pwdLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
+    if(tOrF == 1)
     {
         QMessageBox::warning(this, tr("警告！"),
                     tr("不存在该用户"),
@@ -28,7 +44,7 @@ void UserIn::on_loginBtn_clicked()
         ui->pwdLineEdit->clear();
         ui->usrLineEdit->setFocus();
     }
-    else if(interact.updating() == 0)
+    else if(tOrF == 0)
     {
         QMessageBox::warning(this, tr("警告！"),
                     tr("密码错误！"),

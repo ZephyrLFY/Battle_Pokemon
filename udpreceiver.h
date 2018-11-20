@@ -4,17 +4,16 @@
 #include <QWidget>
 #include <QtNetwork>
 
-namespace Ui {
-class udpReceiver;
-}
-
-class udpReceiver : public QWidget
+class udpReceiver : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit udpReceiver(QWidget *parent = nullptr);
+    explicit udpReceiver(QObject *parent = nullptr);
     ~udpReceiver();
+    QUdpSocket *sender;
+
+public slots:
     int updating();
     void whatToDo(int flag);
     void sendMsg(QString msg);
@@ -22,11 +21,8 @@ public:
 private slots:
     void processPendingDatagram();
 
-    void on_sendBtn_clicked();
-
 private:
-    Ui::udpReceiver *ui;
-    QUdpSocket *sender;
+    //QUdpSocket *sender;
     QUdpSocket *receiver;
     bool tOrF;
 };
