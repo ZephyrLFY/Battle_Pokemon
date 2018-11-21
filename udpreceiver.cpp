@@ -1,22 +1,19 @@
 #include "udpreceiver.h"
-#include "ui_udpreceiver.h"
+#include <QDebug>
 
-udpReceiver::udpReceiver(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::udpReceiver)
+udpReceiver::udpReceiver(QObject *parent)
 {
-    ui->setupUi(this);
-    receiver = new QUdpSocket(this);
+    receiver = new QUdpSocket;
+    sender = new QUdpSocket;
     receiver->bind(39962,QUdpSocket::ShareAddress);
     connect(receiver,SIGNAL(readyRead()),
     this,SLOT(processPendingDatagram()));
-    sender = new QUdpSocket(this);
+    connect(sender,SIGNAL(),
+    this,SLOT(whatToDo(int flag)));
 }
 
 udpReceiver::~udpReceiver()
-{
-    delete ui;
-}
+{}
 
 void udpReceiver::processPendingDatagram()
 {
@@ -30,7 +27,7 @@ void udpReceiver::processPendingDatagram()
        QString flag(datagram);
        tOrF = flag.toInt();
        //将数据报内容显示出来
-       ui->label->setText(datagram);
+       //ui->label->setText(datagram);
     }
 }
 
@@ -50,7 +47,8 @@ void udpReceiver::whatToDo(int flag)
     {
         sendMsg = "2";
     }
-    sender->writeDatagram(sendMsg.toUtf8(),QHostAddress::Broadcast,45454);
+    QByteArray datagram = sendMsg.toUtf8();
+    sender->writeDatagram(datagram.data(),datagram.size(),QHostAddress::Broadcast,45454);
 }
 
 void udpReceiver::sendMsg(QString msg)
@@ -58,8 +56,4 @@ void udpReceiver::sendMsg(QString msg)
     sender->writeDatagram(msg.toUtf8(),QHostAddress::Broadcast,45454);
 }
 
-void udpReceiver::on_sendBtn_clicked()
-{
-    QString sendMsg = ui->sendLineEdit->text();
-    sender->writeDatagram(sendMsg.toUtf8(),QHostAddress::Broadcast,45454);
-}
+

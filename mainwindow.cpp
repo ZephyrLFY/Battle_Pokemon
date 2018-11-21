@@ -35,6 +35,8 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_testBtn_clicked()
 {
+    QString msg = "3";
+    sender->writeDatagram(msg.toUtf8(),QHostAddress::Broadcast,45454);
     QByteArray datagram = "hello world!";
     sender->writeDatagram(datagram.data(),datagram.size(),QHostAddress::Broadcast,45454);
 }
@@ -44,7 +46,7 @@ void MainWindow::processPendingDatagram()
     while(receiver->hasPendingDatagrams())  //拥有等待的数据报
         {
            QByteArray datagram; //拥于存放接收的数据报
-    //让datagram的大小为等待处理的数据报的大小，这样才能接收到完整的数据
+           //让datagram的大小为等待处理的数据报的大小，这样才能接收到完整的数据
            datagram.resize(receiver->pendingDatagramSize());
            //接收数据报，将其存放到datagram中
            receiver->readDatagram(datagram.data(),datagram.size());
