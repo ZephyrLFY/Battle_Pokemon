@@ -21,8 +21,6 @@ public:
 private slots:
     void on_sendBtn_clicked();
 
-    //void processPendingDatagram();
-
     void dealDatagram();
 
     void usrs(int inOrNew);
@@ -37,7 +35,7 @@ private:
     Ui::udpReceiver *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
-    Log loger;
+    Log *loger;
 };
 
 #endif // UDPRECEIVER_H

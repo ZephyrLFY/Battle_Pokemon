@@ -40,6 +40,7 @@ void Log::initDatabase()
 
 QString Log::searchPwd(QString name)
 {
+    this->name = name;
     QString pwd;
     QSqlQuery query;
     query.exec(QString("select password from player where (ID = '%1')").arg(name));

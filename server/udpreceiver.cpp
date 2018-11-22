@@ -10,6 +10,7 @@ udpReceiver::udpReceiver(QWidget *parent) :
     ui->setupUi(this);
     receiver = new QUdpSocket(this);
     receiver->bind(45454,QUdpSocket::ShareAddress);
+    loger = new Log;
     connect(receiver,SIGNAL(readyRead()),
     this,SLOT(dealDatagram()));
     sender = new QUdpSocket(this);
@@ -23,7 +24,7 @@ udpReceiver::~udpReceiver()
 void udpReceiver::on_sendBtn_clicked()
 {
     QString sendMsg = ui->sendLineEdit->text();
-    sender->writeDatagram(sendMsg.toUtf8(),QHostAddress("10.128.199.8"),39962);
+    sender->writeDatagram(sendMsg.toUtf8(),QHostAddress("10.8.162.229"),39962);
 }
 
 void udpReceiver::usrs(int inOrNew)
@@ -65,14 +66,14 @@ void udpReceiver::usrs(int inOrNew)
             sendgram = "0";
         }
     }
-    sender->writeDatagram(sendgram,QHostAddress("10.128.199.8"),39962);
+    sender->writeDatagram(sendgram,QHostAddress("10.8.162.229"),39962);
     qDebug() << sendgram << endl;
 }
 
 
 int udpReceiver::userIn(QString name,QString pwd)
 {
-    QString usrPwd = loger.searchPwd(name);
+    QString usrPwd = loger->searchPwd(name);
     if(pwd == usrPwd)
     {
         QSqlQuery query;
@@ -91,9 +92,9 @@ int udpReceiver::userIn(QString name,QString pwd)
 
 bool udpReceiver::newUsr(QString name,QString pwd)
 {
-    if(loger.addNewusr(name,pwd))
+    if(loger->addNewusr(name,pwd))
     {
-        loger.addPokemon(name);
+        loger->addPokemon(name);
         return true;
     }
     return false;
@@ -116,13 +117,25 @@ void udpReceiver::dealDatagram()
         receiver->readDatagram(datagram.data(),datagram.size());
         QString dataKind(datagram);
         int which = dataKind.toInt();
-        if(which == 1||which == 2)
+        switch(which)
+        {
+        case 1:
+        case 2:
         {
             usrs(which);
+            break;
         }
-        else if(which == 3)
+        case 3:
         {
             txShow();
+            break;
+        }
+        case 4:
+        {
+            loger->freeConnection();
+            sender->writeDatagram("1",QHostAddress("10.8.162.229"),39962);
+            break;
+        }
         }
     }
 }
