@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "userview.h"
-#include "connection.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete sender;
+    delete receiver;
     delete ui;
 }
 
@@ -26,12 +27,13 @@ void MainWindow::on_action_triggered()
     viewer.exec();
 }
 
-//void MainWindow::on_logoutBtn_clicked()
-//{
-//    extern Log loger;
-//    if(loger.freeConnection())
-//        QMessageBox::warning(this, tr("注销"),tr("您已成功下线。"),QMessageBox::Yes);
-//}
+void MainWindow::on_logoutBtn_clicked()
+{
+    sender->writeDatagram("4",QHostAddress::Broadcast,45454);
+    receiver->waitForReadyRead();
+    if(state)
+        QMessageBox::warning(this, tr("注销"),tr("您已成功下线。"),QMessageBox::Yes);
+}
 
 void MainWindow::on_testBtn_clicked()
 {
@@ -52,5 +54,7 @@ void MainWindow::processPendingDatagram()
            receiver->readDatagram(datagram.data(),datagram.size());
            //将数据报内容显示出来
            ui->msgReceiver->setText(datagram);
+           if(QString::fromUtf8(datagram) == "1")
+               state = 1;
         }
 }

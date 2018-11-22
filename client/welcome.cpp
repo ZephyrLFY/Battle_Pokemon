@@ -2,15 +2,12 @@
 #include "ui_welcome.h"
 #include "newuser.h"
 #include "userin.h"
-#include "udpreceiver.h"
-#include <QDebug>
 
 welcome::welcome(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::welcome)
 {
     ui->setupUi(this);
-    sender = new QUdpSocket(this);
 }
 
 welcome::~welcome()

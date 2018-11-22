@@ -2,7 +2,6 @@
 #include "welcome.h"
 #include "connection.h"
 #include "petcreating.h"
-#include "udpreceiver.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])

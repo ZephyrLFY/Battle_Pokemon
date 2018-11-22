@@ -20,7 +20,7 @@ public:
 private slots:
     void on_action_triggered();
 
-    //void on_logoutBtn_clicked();
+    void on_logoutBtn_clicked();
 
     void on_testBtn_clicked();
 
@@ -30,6 +30,7 @@ private:
     Ui::MainWindow *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
+    bool state = 0;
 };
 
 #endif // MAINWINDOW_H

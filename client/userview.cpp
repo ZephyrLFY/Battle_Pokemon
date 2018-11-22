@@ -7,7 +7,7 @@ Userview::Userview(QWidget *parent) :
     ui(new Ui::Userview)
 {
     ui->setupUi(this);
-    //Log loger;
+    Log loger;
     model = new QSqlTableModel(this);
     model->setTable("player");
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
@@ -25,5 +25,6 @@ Userview::Userview(QWidget *parent) :
 
 Userview::~Userview()
 {
+    delete model;
     delete ui;
 }

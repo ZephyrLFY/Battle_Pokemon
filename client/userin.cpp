@@ -1,6 +1,5 @@
 #include "userin.h"
 #include "ui_userin.h"
-#include "udpreceiver.h"
 
 UserIn::UserIn(QWidget *parent) :
     QDialog(parent),
@@ -16,6 +15,8 @@ UserIn::UserIn(QWidget *parent) :
 
 UserIn::~UserIn()
 {
+    delete sender;
+    delete receiver;
     delete ui;
 }
 
@@ -41,11 +42,7 @@ void UserIn::on_loginBtn_clicked()
     sleep(1);
     sender->writeDatagram(ui->usrLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
     sender->writeDatagram(ui->pwdLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
-    qDebug() << tOrF << endl;
-    receiver->waitForReadyRead();
-    dealDatagram();
-    qDebug() << tOrF << endl;
-
+    //receiver->waitForReadyRead();
     if(tOrF == 1)
     {
         QMessageBox::warning(this, tr("警告！"),

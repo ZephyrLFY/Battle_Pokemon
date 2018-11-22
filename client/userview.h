@@ -3,7 +3,6 @@
 
 #include <QDialog>
 #include <QSqlTableModel>
-#include "udpreceiver.h"
 
 namespace Ui {
 class Userview;

@@ -1,8 +1,5 @@
 #include "newuser.h"
 #include "ui_newuser.h"
-#include "connection.h"
-#include "udpreceiver.h"
-#include  <unistd.h>
 
 Newuser::Newuser(QWidget *parent) :
     QDialog(parent),
@@ -19,6 +16,8 @@ Newuser::Newuser(QWidget *parent) :
 
 Newuser::~Newuser()
 {
+    delete sender;
+    delete receiver;
     delete ui;
 }
 

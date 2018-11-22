@@ -2,8 +2,6 @@
 #define WELCOME_H
 
 #include <QDialog>
-#include <QDebug>
-#include <QtNetwork>
 
 namespace Ui {
 class welcome;
@@ -24,7 +22,6 @@ private slots:
 
 private:
     Ui::welcome *ui;
-    QUdpSocket *sender;
 };
 
 #endif // WELCOME_H

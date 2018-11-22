@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QMessageBox>
 #include <QtNetwork>
+#include <unistd.h>
 
 namespace Ui {
 class Newuser;
