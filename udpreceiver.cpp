@@ -8,8 +8,8 @@ udpReceiver::udpReceiver(QObject *parent)
     receiver->bind(39962,QUdpSocket::ShareAddress);
     connect(receiver,SIGNAL(readyRead()),
     this,SLOT(processPendingDatagram()));
-    //connect(sender,SIGNAL(),
-    //this,SLOT(whatToDo(int flag)));
+    connect(sender,SIGNAL(),
+    this,SLOT(whatToDo(int flag)));
 }
 
 udpReceiver::~udpReceiver()
