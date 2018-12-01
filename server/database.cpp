@@ -6,7 +6,7 @@ Log::Log()
     if (!db.open())
         QMessageBox::critical(0, qApp->tr("无法打开数据库"),qApp->tr("未能与数据库建立连接。"), QMessageBox::Cancel);
     query = new QSqlQuery(db);
-    initDatabase();
+    //initDatabase();
 }
 
 Log::~Log()

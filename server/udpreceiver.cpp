@@ -60,7 +60,6 @@ void udpReceiver::usrs(int inOrNew)
             sendgram = "0";
     }
     sender->writeDatagram(sendgram,QHostAddress("10.128.199.8"),39962);
-    qDebug() << sendgram << endl;
 }
 
 
