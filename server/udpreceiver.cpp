@@ -11,20 +11,21 @@ udpReceiver::udpReceiver(QWidget *parent) :
     receiver = new QUdpSocket(this);
     receiver->bind(45454,QUdpSocket::ShareAddress);
     loger = new Log;
-    connect(receiver,SIGNAL(readyRead()),
-    this,SLOT(dealDatagram()));
+    connect(receiver,SIGNAL(readyRead()),this,SLOT(dealDatagram()));
     sender = new QUdpSocket(this);
 }
 
 udpReceiver::~udpReceiver()
 {
     delete ui;
+    delete receiver;
+    delete sender;
 }
 
 void udpReceiver::on_sendBtn_clicked()
 {
     QString sendMsg = ui->sendLineEdit->text();
-    sender->writeDatagram(sendMsg.toUtf8(),QHostAddress("10.8.162.229"),39962);
+    sender->writeDatagram(sendMsg.toUtf8(),QHostAddress("10.128.199.8"),39962);
 }
 
 void udpReceiver::usrs(int inOrNew)
@@ -42,31 +43,23 @@ void udpReceiver::usrs(int inOrNew)
     if(inOrNew == 1)
     {
         int flag = userIn(userName,userPwd);
-        if(flag == 2)
-        {
+        if(flag == 3)
+            sendgram = "3";
+        else if(flag == 2)
             sendgram = "2";
-        }
-        else if(flag == 1)
-        {
+        else if(flag == 1)        
             sendgram = "1";
-        }
-        else
-        {
+        else        
             sendgram = "0";
-        }
     }
     else
     {
-        if(newUsr(userName,userPwd))
-        {
+        if(newUsr(userName,userPwd))        
             sendgram = "1";
-        }
-        else
-        {
+        else        
             sendgram = "0";
-        }
     }
-    sender->writeDatagram(sendgram,QHostAddress("10.8.162.229"),39962);
+    sender->writeDatagram(sendgram,QHostAddress("10.128.199.8"),39962);
     qDebug() << sendgram << endl;
 }
 
@@ -76,12 +69,13 @@ int udpReceiver::userIn(QString name,QString pwd)
     QString usrPwd = loger->searchPwd(name);
     if(pwd == usrPwd)
     {
-        QSqlQuery query;
-        query.prepare("update player set alive = ? where ID = ?");
-        query.addBindValue(1);
-        query.addBindValue(name);
-        query.exec();
-        return 2;
+        if(loger->aliveOrNot(name))
+            return 3;
+        else
+        {
+            loger->linkStart(name);
+            return 2;
+        }
     }
     else if(usrPwd == "NULL")
     {
@@ -108,6 +102,16 @@ void udpReceiver::txShow()
     ui->label->setText(datagram);
 }
 
+void udpReceiver::linkOver()
+{
+    QByteArray datagram;
+    datagram.resize(receiver->pendingDatagramSize());
+    receiver->readDatagram(datagram.data(),datagram.size());
+    QString name = datagram.data();
+    loger->freeConnection(name);
+    sender->writeDatagram("1",QHostAddress("10.128.199.8"),39962);
+}
+
 void udpReceiver::dealDatagram()
 {
     while(receiver->hasPendingDatagrams())
@@ -116,7 +120,7 @@ void udpReceiver::dealDatagram()
         datagram.resize(receiver->pendingDatagramSize());
         receiver->readDatagram(datagram.data(),datagram.size());
         QString dataKind(datagram);
-        int which = dataKind.toInt();
+        int which = datagram.toInt();
         switch(which)
         {
         case 1:
@@ -132,8 +136,7 @@ void udpReceiver::dealDatagram()
         }
         case 4:
         {
-            loger->freeConnection();
-            sender->writeDatagram("1",QHostAddress("10.8.162.229"),39962);
+            linkOver();
             break;
         }
         }

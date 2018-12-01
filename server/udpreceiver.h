@@ -31,6 +31,8 @@ private slots:
 
     void txShow();
 
+    void linkOver();
+
 private:
     Ui::udpReceiver *ui;
     QUdpSocket *sender;

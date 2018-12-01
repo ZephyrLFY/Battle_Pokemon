@@ -12,16 +12,18 @@ class Log : public QObject
 public:
     Log();
     virtual ~Log();
-    QString name;
 public slots:
     void createConnection();
-    bool freeConnection();
+    bool freeConnection(QString name);
     void initDatabase();
     QString searchPwd(QString name);
     bool addNewusr(QString name,QString pwd);
     void addPokemon(QString name);
+    bool aliveOrNot(QString name);
+    void linkStart(QString name);
 private:
     QSqlDatabase db;
+    QSqlQuery *query;
 };
 
 
