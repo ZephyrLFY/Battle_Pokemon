@@ -9,7 +9,6 @@ UserIn::UserIn(QWidget *parent) :
     sender = new QUdpSocket(this);
     receiver = new QUdpSocket(this);
     receiver->bind(39962,QUdpSocket::ShareAddress);
-    //connect(receiver,SIGNAL(readyRead()),this,SLOT(dealDatagram()));
 }
 
 UserIn::~UserIn()
@@ -28,7 +27,6 @@ void UserIn::dealDatagram()
        receiver->readDatagram(datagram.data(),datagram.size());
        QString flag(datagram);
        tOrF = flag.toInt();
-       qDebug() << tOrF  << " " << "1" << endl;
     }
 }
 
@@ -40,7 +38,6 @@ void UserIn::on_loginBtn_clicked()
     sender->writeDatagram(ui->pwdLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
     receiver->waitForReadyRead();
     dealDatagram();
-    qDebug() << tOrF << endl;
     switch(tOrF)
     {
     case 3:
