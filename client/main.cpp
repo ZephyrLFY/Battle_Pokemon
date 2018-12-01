@@ -4,6 +4,8 @@
 #include "petcreating.h"
 #include <QApplication>
 
+QString usrName;
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

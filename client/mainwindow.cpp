@@ -29,7 +29,9 @@ void MainWindow::on_action_triggered()
 
 void MainWindow::on_logoutBtn_clicked()
 {
+    extern QString usrName;
     sender->writeDatagram("4",QHostAddress::Broadcast,45454);
+    sender->writeDatagram(usrName.toUtf8(),QHostAddress::Broadcast,45454);
     receiver->waitForReadyRead();
     if(state)
         QMessageBox::warning(this, tr("注销"),tr("您已成功下线。"),QMessageBox::Yes);

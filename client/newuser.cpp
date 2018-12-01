@@ -39,14 +39,17 @@ void Newuser::on_loginBtn_clicked()
     sender->writeDatagram(msg.toUtf8(),QHostAddress::Broadcast,45454);
     sleep(1);
     sender->writeDatagram(ui->usrLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
+    sleep(1);
     sender->writeDatagram(ui->pwdLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
     if(flag)
+    {
+        extern QString usrName;
+        usrName = ui->usrLineEdit->text().toUtf8();
         accept();
+    }
     else
     {
-        QMessageBox::warning(this, tr("警告！"),
-                    tr("该用户名已被注册！"),
-                           QMessageBox::Yes);
+        QMessageBox::warning(this, tr("警告！"),tr("该用户名已被注册！"),QMessageBox::Yes);
         ui->usrLineEdit->clear();
         ui->pwdLineEdit->clear();
         ui->usrLineEdit->setFocus();

@@ -28,7 +28,7 @@ private:
     Ui::UserIn *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
-    int tOrF = 3;
+    int tOrF = 4;
 };
 
 #endif // USERIN_H
