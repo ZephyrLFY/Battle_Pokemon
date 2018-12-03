@@ -1,10 +1,10 @@
 #ifndef PETCREATING_H
 #define PETCREATING_H
-#include <iostream>
 #include <ctime>
 #include <QApplication>
 #include <QtGlobal>
 #include <QTime>
+#include <QDebug>
 
 class pokemon : public QObject
 {
@@ -15,9 +15,9 @@ public:
     virtual void attack() = 0;//攻击函数，根据类型有不同
     double atkf();//攻击频率
     double damagecost();//造成伤害
-    void damagedeal(double damage,uint ran);//计算伤害，修改血量
+    void damagedeal(double damage,qint32 ran);//计算伤害，修改血量
     void changetype();//实例化精灵时根据类型而调节属性
-    void expup(int bonus);//获得经验值
+    void expup(qint32 bonus);//获得经验值
     int gain();//对方会获得多少经验值
     bool upornot();//经验是否满足升级
     void lvlup();//升级
@@ -51,7 +51,7 @@ class Hitmonlee : public str_pkm//沙瓦朗
 public:
     void attack();
 private:
-    std::string name = "Hitmonlee";
+    QString name = "Hitmonlee";
 };
 
 class Charmander : public str_pkm//小火龙
@@ -59,7 +59,7 @@ class Charmander : public str_pkm//小火龙
 public:
     void attack();
 private:
-    std::string name = "Charmander";
+    QString name = "Charmander";
 };
 
 class Squirtle : public str_pkm//杰尼龟
@@ -67,7 +67,7 @@ class Squirtle : public str_pkm//杰尼龟
 public:
     void attack();
 private:
-    std::string name = "Squirtle";
+    QString name = "Squirtle";
 };
 
 class Licktung : public fat_pkm//大舌头
@@ -75,7 +75,7 @@ class Licktung : public fat_pkm//大舌头
 public:
     void attack();
 private:
-    std::string name = "Licktung";
+    QString name = "Licktung";
 };
 
 class Muk : public fat_pkm//臭臭泥
@@ -83,7 +83,7 @@ class Muk : public fat_pkm//臭臭泥
 public:
     void attack();
 private:
-    std::string name = "Muk";
+    QString name = "Muk";
 };
 
 class Krabby : public fat_pkm//大钳蟹
@@ -91,7 +91,7 @@ class Krabby : public fat_pkm//大钳蟹
 public:
     void attack();
 private:
-    std::string name = "Krabby";
+    QString name = "Krabby";
 };
 
 class Geodude : public def_pkm//小拳石
@@ -99,7 +99,7 @@ class Geodude : public def_pkm//小拳石
 public:
     void attack();
 private:
-    std::string name = "Geodude";
+    QString name = "Geodude";
 };
 
 class Shellder :public def_pkm//大舌贝
@@ -107,7 +107,7 @@ class Shellder :public def_pkm//大舌贝
 public:
     void attack();
 private:
-    std::string name = "Shellder";
+    QString name = "Shellder";
 };
 
 class Onix : public def_pkm//大岩蛇
@@ -115,7 +115,7 @@ class Onix : public def_pkm//大岩蛇
 public:
     void attack();
 private:
-    std::string name = "Onix";
+    QString name = "Onix";
 };
 
 class Bulbasaur : public agi_pkm//妙蛙种子
@@ -123,7 +123,7 @@ class Bulbasaur : public agi_pkm//妙蛙种子
 public:
     void attack();
 private:
-    std::string name = "Bulbasaur";
+    QString name = "Bulbasaur";
 };
 
 class Pidgeotto : public agi_pkm//比比鸟
@@ -131,7 +131,7 @@ class Pidgeotto : public agi_pkm//比比鸟
 public:
     void attack();
 private:
-    std::string name = "Pidgeotto";
+    QString name = "Pidgeotto";
 };
 
 class Pikachu : public agi_pkm//皮卡丘
@@ -139,7 +139,7 @@ class Pikachu : public agi_pkm//皮卡丘
 public:
     void attack();
 private:
-    std::string name = "Pikachu";
+    QString name = "Pikachu";
 };
 
 pokemon* chooseyourpet();

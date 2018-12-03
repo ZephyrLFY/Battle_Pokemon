@@ -1,5 +1,6 @@
 #include "newuser.h"
 #include "ui_newuser.h"
+#include "wideuse.h"
 
 Newuser::Newuser(QWidget *parent) :
     QDialog(parent),
@@ -9,9 +10,8 @@ Newuser::Newuser(QWidget *parent) :
     ui->usrLineEdit->setFocus();
     sender = new QUdpSocket(this);
     receiver = new QUdpSocket(this);
-    receiver->bind(45454,QUdpSocket::ShareAddress);
-    connect(receiver,SIGNAL(readyRead()),
-    this,SLOT(dealDatagram()));
+    receiver->bind(39962,QUdpSocket::ShareAddress);
+    connect(receiver,SIGNAL(readyRead()),this,SLOT(dealDatagram()));
 }
 
 Newuser::~Newuser()
@@ -35,15 +35,14 @@ void Newuser::dealDatagram()
 
 void Newuser::on_loginBtn_clicked()
 {
-    QString msg = "2";
-    sender->writeDatagram(msg.toUtf8(),QHostAddress::Broadcast,45454);
-    sleep(1);
-    sender->writeDatagram(ui->usrLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
-    sleep(1);
-    sender->writeDatagram(ui->pwdLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
+    QList<QString> login;
+    login << "2" << ui->usrLineEdit->text().toUtf8() << ui->pwdLineEdit->text().toUtf8();
+    QByteArray temp;
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << login;
+    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
     if(flag)
     {
-        extern QString usrName;
         usrName = ui->usrLineEdit->text().toUtf8();
         accept();
     }

@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QtNetwork>
-#include <unistd.h>
+#include <QStandardItemModel>
 
 namespace Ui {
 class MainWindow;
@@ -19,19 +19,23 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_action_triggered();
-
     void on_logoutBtn_clicked();
 
     void on_testBtn_clicked();
 
     void processPendingDatagram();
 
+    void updateUsr(QList<QString> &usrInfo);
+
+    void loseLink();
+
 private:
     Ui::MainWindow *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
-    bool state = 0;
+    bool state = 1;
+    //QStandardItemModel *usrModel;
+    //QStandardItemModel *pokeModel;
 };
 
 #endif // MAINWINDOW_H

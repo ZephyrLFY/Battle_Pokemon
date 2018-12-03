@@ -1,10 +1,6 @@
 #include "mainwindow.h"
 #include "welcome.h"
-#include "connection.h"
 #include "petcreating.h"
-#include <QApplication>
-
-QString usrName;
 
 int main(int argc, char *argv[])
 {

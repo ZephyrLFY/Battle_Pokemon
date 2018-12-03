@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QSqlQuery>
 #include <QtNetwork>
+#include <QList>
 #include <unistd.h>
 
 namespace Ui {
@@ -28,7 +29,7 @@ private:
     Ui::UserIn *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
-    int tOrF = 4;
+    qint32 tOrF = 4;
 };
 
 #endif // USERIN_H

@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "userview.h"
+#include "wideuse.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -10,53 +10,110 @@ MainWindow::MainWindow(QWidget *parent) :
     sender = new QUdpSocket(this);
     receiver = new QUdpSocket(this);
     receiver->bind(39962,QUdpSocket::ShareAddress);
-    connect(receiver,SIGNAL(readyRead()),
-    this,SLOT(processPendingDatagram()));
+    connect(receiver,SIGNAL(readyRead()),this,SLOT(processPendingDatagram()));
 }
 
 MainWindow::~MainWindow()
 {
+    if(state)
+        loseLink();
     delete sender;
     delete receiver;
     delete ui;
 }
 
-void MainWindow::on_action_triggered()
+void MainWindow::loseLink()
 {
-    Userview viewer;
-    viewer.exec();
+    QList<QString> text;
+    text << "4" << usrName;
+    QByteArray temp;
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << text;
+    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
 }
 
 void MainWindow::on_logoutBtn_clicked()
 {
-    extern QString usrName;
-    sender->writeDatagram("4",QHostAddress::Broadcast,45454);
-    sender->writeDatagram(usrName.toUtf8(),QHostAddress::Broadcast,45454);
+    loseLink();
     receiver->waitForReadyRead();
     if(state)
         QMessageBox::warning(this, tr("注销"),tr("您已成功下线。"),QMessageBox::Yes);
+    state = 0;
 }
 
 void MainWindow::on_testBtn_clicked()
 {
-    QString msg = "3";
-    sender->writeDatagram(msg.toUtf8(),QHostAddress::Broadcast,45454);
-    QByteArray datagram = "hello world!";
-    sender->writeDatagram(datagram.data(),datagram.size(),QHostAddress::Broadcast,45454);
+    QList<QString> text;
+    text << "5" << usrName;
+    QByteArray temp;
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << text;
+    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
+    receiver->waitForReadyRead();
+    processPendingDatagram();
+}
+
+void MainWindow::updateUsr(QList<QString> &usrInfo)
+{
+    qint32 i = 0;
+    qint32 rowNum = usrInfo.count("line");
+    QStandardItemModel *model = new QStandardItemModel(this);
+    model->setColumnCount(13);
+    model->setRowCount(rowNum);
+    model->setHeaderData(0,Qt::Horizontal,"用户名");
+    model->setHeaderData(1,Qt::Horizontal,"在线情况");
+    model->setHeaderData(2,Qt::Horizontal,"胜率");
+    model->setHeaderData(3,Qt::Horizontal,"数量徽章");
+    model->setHeaderData(4,Qt::Horizontal,"精英徽章");
+    model->setHeaderData(5,Qt::Horizontal,"精灵数量");
+    model->setHeaderData(6,Qt::Horizontal,"小精灵1");
+    model->setHeaderData(7,Qt::Horizontal,"小精灵2");
+    model->setHeaderData(8,Qt::Horizontal,"小精灵3");
+    model->setHeaderData(9,Qt::Horizontal,"小精灵4");
+    model->setHeaderData(10,Qt::Horizontal,"小精灵5");
+    model->setHeaderData(11,Qt::Horizontal,"小精灵6");
+    model->setHeaderData(12,Qt::Horizontal,"小精灵7");
+    for(qint32 row = 0; row < rowNum; row++)
+    {
+        for(qint32 col = 0; col < 12; col++)
+        {
+            if(usrInfo.at(i) == "line")
+            {
+                i++;
+                break;
+            }
+            else if(col == 3 || col == 4)
+                continue;
+            else
+            {
+                QStandardItem *item = new QStandardItem(usrInfo.at(i));
+                model->setItem(row,col,item);
+                i++;
+            }
+        }
+    }
+    ui->userInfo->setModel(model);
+    ui->userInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void MainWindow::processPendingDatagram()
 {
-    while(receiver->hasPendingDatagrams())  //拥有等待的数据报
-        {
-           QByteArray datagram; //拥于存放接收的数据报
-           //让datagram的大小为等待处理的数据报的大小，这样才能接收到完整的数据
-           datagram.resize(receiver->pendingDatagramSize());
-           //接收数据报，将其存放到datagram中
-           receiver->readDatagram(datagram.data(),datagram.size());
-           //将数据报内容显示出来
-           ui->msgReceiver->setText(datagram);
-           if(QString::fromUtf8(datagram) == "1")
-               state = 1;
-        }
+    while(receiver->hasPendingDatagrams())
+    {
+       QByteArray datagram;
+       QList<QString> usrInfo;
+       datagram.resize(receiver->pendingDatagramSize());
+       receiver->readDatagram(datagram.data(),datagram.size());
+       ui->msgReceiver->setText(datagram);
+       if(datagram.size() == 1)
+           if(QString::fromUtf8(datagram) == "0")
+               state = 0;
+           else;
+       else
+           {
+               QDataStream stream(&datagram, QIODevice::ReadWrite);
+               stream >> usrInfo;
+               updateUsr(usrInfo);
+           }
+    }
 }

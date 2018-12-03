@@ -1,5 +1,6 @@
 #include "userin.h"
 #include "ui_userin.h"
+#include "wideuse.h"
 
 UserIn::UserIn(QWidget *parent) :
     QDialog(parent),
@@ -32,10 +33,13 @@ void UserIn::dealDatagram()
 
 void UserIn::on_loginBtn_clicked()
 {
-    QString msg = "1";
-    sender->writeDatagram(msg.toUtf8(),QHostAddress::Broadcast,45454);
-    sender->writeDatagram(ui->usrLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
-    sender->writeDatagram(ui->pwdLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
+
+    QList<QString> login;
+    login << "1" << ui->usrLineEdit->text().toUtf8() << ui->pwdLineEdit->text().toUtf8();
+    QByteArray temp;
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << login;
+    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
     receiver->waitForReadyRead();
     dealDatagram();
     switch(tOrF)
@@ -61,7 +65,6 @@ void UserIn::on_loginBtn_clicked()
     }
     default:
     {
-        extern QString usrName;
         usrName = ui->usrLineEdit->text().toUtf8();
         accept();
     }

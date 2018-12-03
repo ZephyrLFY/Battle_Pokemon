@@ -2,7 +2,7 @@
 #define random(a,b) (rand()%(b-a+1)+a)
 using namespace std;
 
-void beat(pokemon &a,pokemon&b,int ran)//攻击函数，攻击者和被攻击者
+void beat(pokemon &a,pokemon&b,qint32 ran)//攻击函数，攻击者和被攻击者
 {
     a.attack();
     b.damagedeal(a.damagecost(),ran);
@@ -11,17 +11,17 @@ void beat(pokemon &a,pokemon&b,int ran)//攻击函数，攻击者和被攻击者
 void result(pokemon &a,pokemon &b)
 {
     if((!a.alive())&&(!b.alive()))
-        cout << "Both of them are dead." << endl;
+        qDebug() << "Both of them are dead." << endl;
     else if(a.alive())
     {
-        cout << "Congratulations! Your pet wins!" << endl;
+        qDebug() << "Congratulations! Your pet wins!" << endl;
         a.expup(b.gain());
-        cout << "You gain " << b.gain() << " exp." << endl;
+        qDebug() << "You gain " << b.gain() << " exp." << endl;
         if(a.upornot())
             a.lvlup();
     }
     else
-        cout << "Sorry, your pet is dead." << endl;
+        qDebug() << "Sorry, your pet is dead." << endl;
 }
 
 void battle(pokemon &a,pokemon &b)/*根据时间以及攻击间隔，互相攻击*/
@@ -104,22 +104,20 @@ double pokemon::damagecost()
     return atk;
 }
 
-void pokemon::damagedeal(double damage,uint ran)
+void pokemon::damagedeal(double damage,qint32 ran)
 {
     damage = damage - def;
     if(damage < 0)
         damage = 0;
     qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()) + ran);
-    //srand((unsigned)time(NULL) + ran);//随机种子
     int dodge = qrand() % 100;
-    //long dodge = random(1,100);//闪避
     bool isDodge = 0;
     if(dodge <= 10)
     {
         if(type == 4)
         {
             damage = 0;
-            cout << "被闪避了! ";
+            qDebug() << "被闪避了! ";
             isDodge = 1;
         }
         else
@@ -127,7 +125,7 @@ void pokemon::damagedeal(double damage,uint ran)
             if(damage <= 5)
             {
                 damage = 0;
-                cout << "被闪避了! ";
+                qDebug() << "被闪避了! ";
                 isDodge = 1;
             }
             else;
@@ -135,18 +133,16 @@ void pokemon::damagedeal(double damage,uint ran)
     }
     if(!isDodge)
     {
-        //srand((unsigned)time(NULL) + ran + ran);
         qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()) + ran + ran);
-        //long crush = random(1,100);//暴击
         int crush = qrand() % 100;
         if(crush > 90)
         {
             damage = damage * 1.5;
-            cout << "造成了暴击! ";
+            qDebug() << "造成了暴击! ";
         }
     }
     hp = hp - damage;
-    cout << "造成了" << damage << "点伤害。" << endl;
+    qDebug() << "造成了" << damage << "点伤害。" << endl;
     if(hp < 0)
         hp = 0;
 }
@@ -176,7 +172,7 @@ bool pokemon::upornot()
 
 void pokemon::lvlup()//升级函数，根据精灵类型会有不同
 {
-    cout << "Level up!" << endl;
+    qDebug() << "Level up!" << endl;
     level++;
     exp = 0;
     hpfull();
@@ -213,69 +209,69 @@ void pokemon::lvlup()//升级函数，根据精灵类型会有不同
 
 void pokemon::Test()
 {
-    cout << hp << " " << atk << " " << def << " " << interval << endl;
+    qDebug() << hp << " " << atk << " " << def << " " << interval << endl;
 }
 
 void Hitmonlee::attack()
 {
-    cout << "Hitmonlee : \"Hit!\"";
+    qDebug() << "Hitmonlee : \"Hit!\"";
 }
 
 void Charmander::attack()
 {
-    cout << "Charmander : \"Fire!\"";
+    qDebug() << "Charmander : \"Fire!\"";
 }
 
 void Squirtle::attack()
 {
-    cout << "Squirtle : \"Taste my water!\"";
+    qDebug() << "Squirtle : \"Taste my water!\"";
 }
 
 void Licktung::attack()
 {
-    cout << "Licktung : \"Lick, lick!\"";
+    qDebug() << "Licktung : \"Lick, lick!\"";
 }
 
 void Muk::attack()
 {
-    cout << "Muk : \"Eat my gross muk!\"";
+    qDebug() << "Muk : \"Eat my gross muk!\"";
 }
 
 void Krabby::attack()
 {
-    cout << "Krabby : \"No one can live under my claw!\"";
+    qDebug() << "Krabby : \"No one can live under my claw!\"";
 }
 
 void Geodude::attack()
 {
-    cout << "Geodude : \"Stone power!\"";
+    qDebug() << "Geodude : \"Stone power!\"";
 }
 
 void Shellder::attack()
 {
-    cout << "Shellder : \"Shield smash!\"";
+    qDebug() << "Shellder : \"Shield smash!\"";
 }
 
 void Onix::attack()
 {
-    cout << "Onix : \"You will die for your arrogance!\"";
+    qDebug() << "Onix : \"You will die for your arrogance!\"";
 }
 
 void Bulbasaur::attack()
 {
-    cout << "Bulbasaur : \"Eat my seed!\"";
+    qDebug() << "Bulbasaur : \"Eat my seed!\"";
 }
 
 void Pidgeotto::attack()
 {
-    cout << "Pidgeotto : \"Can you defend my air attack?\"";
+    qDebug() << "Pidgeotto : \"Can you defend my air attack?\"";
 }
 
 void Pikachu::attack()
 {
-    cout << "Pikachu : \"Pika pika!\"";
+    qDebug() << "Pikachu : \"Pika pika!\"";
 }
-
+/*
 pokemon* chooseyourpet()
 {
     int type = 0;
@@ -283,14 +279,14 @@ pokemon* chooseyourpet()
     pokemon *born;
     while(((type != 1)&&(type != 2)&&(type != 3)&&(type != 4))||(specy == 4))
     {
-        cout << "Now you can choose one pokemon." << endl << "Which type do you want?" << endl << "Press 1 for strong type, 2 for fat type, 3 for defence type, and 4 for agile type: " ;
+        qDebug() << "Now you can choose one pokemon." << endl << "Which type do you want?" << endl << "Press 1 for strong type, 2 for fat type, 3 for defence type, and 4 for agile type: " ;
         cin >> type;
-        cout << "I got it!" << endl;
+        qDebug() << "I got it!" << endl;
         if(type == 1)
         {
             while((specy != 1)&&(specy != 2)&&(specy != 3)&&(specy != 4))
             {
-                cout << "Which pokemon do you want? Press 1 for Hitmonlee, 2 for Charmander, 3 for Squirtle, 4 to re-choose the type: " ;
+                qDebug() << "Which pokemon do you want? Press 1 for Hitmonlee, 2 for Charmander, 3 for Squirtle, 4 to re-choose the type: " ;
                 cin >> specy;
                 if(specy == 1)
                     born = new Hitmonlee;
@@ -309,7 +305,7 @@ pokemon* chooseyourpet()
         {
             while((specy != 1)&&(specy != 2)&&(specy != 3)&&(specy != 4))
             {
-                cout << "Which pokemon do you want? Press 1 for Licktung, 2 for Muk, 3 for Krabby, 4 to re-choose the type: " ;
+                qDebug() << "Which pokemon do you want? Press 1 for Licktung, 2 for Muk, 3 for Krabby, 4 to re-choose the type: " ;
                 cin >> specy;
                 if(specy == 1)
                     born = new Licktung;
@@ -327,7 +323,7 @@ pokemon* chooseyourpet()
         {
             while((specy != 1)&&(specy != 2)&&(specy != 3)&&(specy != 4))
             {
-                cout << "Which pokemon do you want? Press 1 for Geodude, 2 for Shellder, 3 for Onix, 4 to re-choose the type: " ;
+                qDebug() << "Which pokemon do you want? Press 1 for Geodude, 2 for Shellder, 3 for Onix, 4 to re-choose the type: " ;
                 cin >> specy;
                 if(specy == 1)
                     born = new Geodude;
@@ -345,7 +341,7 @@ pokemon* chooseyourpet()
         {
             while((specy != 1)&&(specy != 2)&&(specy != 3)&&(specy != 4))
             {
-                cout << "Which pokemon do you want? Press 1 for Bulbarsaur, 2 for Pidgeotto, 3 for Pikachu, 4 to re-choose the type: " ;
+                qDebug() << "Which pokemon do you want? Press 1 for Bulbarsaur, 2 for Pidgeotto, 3 for Pikachu, 4 to re-choose the type: " ;
                 cin >> specy;
                 if(specy == 1)
                     born = new Bulbasaur;
@@ -365,9 +361,9 @@ pokemon* chooseyourpet()
     return born;
 }
 
-/*int main()
+int main()
 {
-    cout << "This is the test version 0.0.1" << endl;
+    qDebug() << "This is the test version 0.0.1" << endl;
     pokemon *a,*b;
     a = chooseyourpet();
     b = chooseyourpet();
