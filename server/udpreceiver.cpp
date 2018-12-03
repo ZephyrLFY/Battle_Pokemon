@@ -1,7 +1,6 @@
 #include "udpreceiver.h"
 #include "ui_udpreceiver.h"
 #include <QDebug>
-#include <unistd.h>
 
 udpReceiver::udpReceiver(QWidget *parent) :
     QMainWindow(parent),
@@ -25,24 +24,15 @@ udpReceiver::~udpReceiver()
 void udpReceiver::on_sendBtn_clicked()
 {
     QString sendMsg = ui->sendLineEdit->text();
-    sender->writeDatagram(sendMsg.toUtf8(),QHostAddress("10.128.199.8"),39962);
+    sender->writeDatagram(sendMsg.toUtf8(),QHostAddress("10.8.162.229"),39962);
 }
 
-void udpReceiver::usrs(int inOrNew)
+void udpReceiver::usrs(int inOrNew,QString name,QString pwd,QHostAddress address)
 {
-    QByteArray datagram,sendgram;
-    QString userName,userPwd;
-    receiver->waitForReadyRead();
-    datagram.resize(receiver->pendingDatagramSize());
-    receiver->readDatagram(datagram.data(),datagram.size());
-    userName = QString::fromUtf8(datagram);
-    receiver->waitForReadyRead();
-    datagram.resize(receiver->pendingDatagramSize());
-    receiver->readDatagram(datagram.data(),datagram.size());
-    userPwd = QString::fromUtf8(datagram);
+    QByteArray sendgram;
     if(inOrNew == 1)
     {
-        int flag = userIn(userName,userPwd);
+        qint32 flag = userIn(name,pwd);
         if(flag == 3)
             sendgram = "3";
         else if(flag == 2)
@@ -54,16 +44,16 @@ void udpReceiver::usrs(int inOrNew)
     }
     else
     {
-        if(newUsr(userName,userPwd))        
+        if(newUsr(name,pwd))
             sendgram = "1";
         else        
             sendgram = "0";
     }
-    sender->writeDatagram(sendgram,QHostAddress("10.128.199.8"),39962);
+    sender->writeDatagram(sendgram,address,39962);
 }
 
 
-int udpReceiver::userIn(QString name,QString pwd)
+qint32 udpReceiver::userIn(QString name,QString pwd)
 {
     QString usrPwd = loger->searchPwd(name);
     if(pwd == usrPwd)
@@ -93,51 +83,72 @@ bool udpReceiver::newUsr(QString name,QString pwd)
     return false;
 }
 
-void udpReceiver::txShow()
+void udpReceiver::txShow(QString text)
 {
-    QByteArray datagram;
-    datagram.resize(receiver->pendingDatagramSize());
-    receiver->readDatagram(datagram.data(),datagram.size());
-    ui->label->setText(datagram);
+    ui->label->setText(text);
 }
 
-void udpReceiver::linkOver()
+void udpReceiver::linkOver(QString name,QHostAddress address)
 {
-    QByteArray datagram;
-    datagram.resize(receiver->pendingDatagramSize());
-    receiver->readDatagram(datagram.data(),datagram.size());
-    QString name = datagram.data();
     loger->freeConnection(name);
-    sender->writeDatagram("1",QHostAddress("10.128.199.8"),39962);
+    sender->writeDatagram("1",address,39962);
 }
+
+void udpReceiver::userInfo(QString name,QHostAddress address)
+{
+    QByteArray temp;
+    QList<QString> usrInfo = loger->getUsr();
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << usrInfo;
+    sender->writeDatagram(temp,address,39962);
+}
+
+//void udpReceiver::pokeInfo(QHostAddress address)
+//{
+
+//}
 
 void udpReceiver::dealDatagram()
 {
+    QHostAddress *sendIp = new QHostAddress;
     while(receiver->hasPendingDatagrams())
     {
         QByteArray datagram;
         datagram.resize(receiver->pendingDatagramSize());
-        receiver->readDatagram(datagram.data(),datagram.size());
-        QString dataKind(datagram);
-        int which = datagram.toInt();
+        receiver->readDatagram(datagram.data(),datagram.size(),sendIp);
+        QList<QString> toDo;
+        QDataStream stream(&datagram, QIODevice::ReadWrite);
+        stream >> toDo;
+        qint32 which = toDo.at(0).toInt();
         switch(which)
         {
         case 1:
         case 2:
         {
-            usrs(which);
+            usrs(which,toDo.at(1),toDo.at(2),*sendIp);
             break;
         }
         case 3:
         {
-            txShow();
+            txShow(toDo.at(1));
             break;
         }
         case 4:
         {
-            linkOver();
+            linkOver(toDo.at(1),*sendIp);
             break;
+        }
+        case 5:
+        {
+            userInfo(toDo.at(1),*sendIp);
+            //pokeInfo(*sendIp);
+            break;
+        }
+        case 6:
+        {
+
         }
         }
     }
+    delete sendIp;
 }

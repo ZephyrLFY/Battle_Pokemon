@@ -23,15 +23,19 @@ private slots:
 
     void dealDatagram();
 
-    void usrs(int inOrNew);
+    void usrs(int inOrNew,QString name,QString pwd,QHostAddress address);
 
-    int userIn(QString name,QString pwd);
+    qint32 userIn(QString name,QString pwd);
 
     bool newUsr(QString name,QString pwd);
 
-    void txShow();
+    void txShow(QString text);
 
-    void linkOver();
+    void linkOver(QString name,QHostAddress address);
+
+    void userInfo(QString name,QHostAddress address);
+
+    //void pokeInfo(QHostAddress address);
 
 private:
     Ui::udpReceiver *ui;

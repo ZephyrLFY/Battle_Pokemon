@@ -5,6 +5,8 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QApplication>
+#include <QList>
+#include <QDebug>
 
 class Log : public QObject
 {
@@ -12,15 +14,17 @@ class Log : public QObject
 public:
     Log();
     virtual ~Log();
-public slots:
-    void createConnection();
-    bool freeConnection(QString name);
     void initDatabase();
     QString searchPwd(QString name);
     bool addNewusr(QString name,QString pwd);
     void addPokemon(QString name);
     bool aliveOrNot(QString name);
     void linkStart(QString name);
+    QList<QString>& getUsr();
+    //QList<QString>* getPoke();
+public slots:
+    void createConnection();
+    bool freeConnection(QString name);
 private:
     QSqlDatabase db;
     QSqlQuery *query;
