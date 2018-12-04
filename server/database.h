@@ -12,7 +12,7 @@ class Log : public QObject
 {
     Q_OBJECT
 public:
-    Log();
+    explicit Log();
     virtual ~Log();
     void initDatabase();
     QString searchPwd(QString name);
@@ -27,7 +27,8 @@ public slots:
     bool freeConnection(QString name);
 private:
     QSqlDatabase db;
-    QSqlQuery *query;
+    QSqlQuery *usrQuery;
+    QSqlQuery *pokeQuery;
 };
 
 
