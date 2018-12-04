@@ -21,7 +21,7 @@ public:
 private slots:
     void on_logoutBtn_clicked();
 
-    void on_testBtn_clicked();
+    void on_usrBtn_clicked();
 
     void processPendingDatagram();
 
@@ -34,8 +34,6 @@ private:
     QUdpSocket *sender;
     QUdpSocket *receiver;
     bool state = 1;
-    //QStandardItemModel *usrModel;
-    //QStandardItemModel *pokeModel;
 };
 
 #endif // MAINWINDOW_H
