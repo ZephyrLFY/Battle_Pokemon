@@ -103,10 +103,14 @@ void udpReceiver::userInfo(QString name,QHostAddress address)
     sender->writeDatagram(temp,address,39962);
 }
 
-//void udpReceiver::pokeInfo(QHostAddress address)
-//{
-
-//}
+void udpReceiver::pokeInfo(QHostAddress address)
+{
+    QByteArray temp;
+    QList<QString> pokeInfo = loger->getPoke();
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << pokeInfo;
+    sender->writeDatagram(temp,address,39962);
+}
 
 void udpReceiver::dealDatagram()
 {
@@ -141,12 +145,12 @@ void udpReceiver::dealDatagram()
         case 5:
         {
             userInfo(toDo.at(1),*sendIp);
-            //pokeInfo(*sendIp);
             break;
         }
         case 6:
         {
-
+            pokeInfo(*sendIp);
+            break;
         }
         }
     }

@@ -33,23 +33,29 @@ bool Log::freeConnection(QString name)
 void Log::initDatabase()
 {
     usrQuery->exec("create table player (ID varchar primary key,password varchar,"
-                "alive bool,ratio float,number int,"
-                "pokemon1 varchar(20),level1 int,"
-                "pokemon2 varchar(20),level2 int,"
-                "pokemon3 varchar(20),level3 int,"
-                "pokemon4 varchar(20),level4 int,"
-                "pokemon5 varchar(20),level5 int,"
-                "pokemon6 varchar(20),level6 int,"
-                "pokemon7 varchar(20),level7 int,"
+                "alive bool,ratio int,number int,"
+                "pokemon1 varchar(20),level1 int,exp1 int,"
+                "pokemon2 varchar(20),level2 int,exp2 int,"
+                "pokemon3 varchar(20),level3 int,exp3 int,"
+                "pokemon4 varchar(20),level4 int,exp4 int,"
+                "pokemon5 varchar(20),level5 int,exp5 int,"
+                "pokemon6 varchar(20),level6 int,exp6 int,"
+                "pokemon7 varchar(20),level7 int,exp7 int,"
                 "end int)");
-    usrQuery->exec("insert into player (ID,password,alive,ratio,number,pokemon1,level1,pokemon2,level2)"
-                "values('test','123',0,0.5,2,'Pikachu',15,'Charmander',13)");
-    usrQuery->exec("insert into player (ID,password,alive,ratio,number,pokemon1,level1,pokemon2,level2)"
-                "values('Zephyr','lifuyang',0,1,2,'Squirtle',15,'Muk',13)");
-    usrQuery->exec("insert into player (ID,password,alive,ratio,number,pokemon1,level1,pokemon2,level2)"
-                "values('god','777',0,0.3,2,'Licktung',2,'Krabby',7)");
+    usrQuery->exec("insert into player (ID,password,alive,ratio,number,pokemon1,level1,exp1,pokemon2,level2,exp2)"
+                "values('test','123',0,50,2,'Pikachu',15,0,'Charmander',13,3)");
+    usrQuery->exec("insert into player (ID,password,alive,ratio,number,pokemon1,level1,exp1,pokemon2,level2,exp2)"
+                "values('Zephyr','lifuyang',0,100,2,'Squirtle',15,0,'Muk',13,3)");
+    usrQuery->exec("insert into player (ID,password,alive,ratio,number,pokemon1,level1,exp1,pokemon2,level2,exp2)"
+                "values('god','777',0,30,2,'Licktung',2,0,'Krabby',7,5)");
     pokeQuery->exec("create table pokemon (ID varchar primary key,name varchar(20),"
-                    "level qint32,exp qint32)");
+                    "level qint32)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                    "values('1','Pikachu',1)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                    "values('2','Squirtle',7)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                    "values('3','Charmander',15)");
 }
 
 QString Log::searchPwd(QString name)
@@ -92,6 +98,7 @@ bool Log::addNewusr(QString name,QString pwd)
         usrQuery->addBindValue(name);
         usrQuery->addBindValue(pwd);
         usrQuery->exec();
+        linkStart(name);
         return true;
     }
 }
@@ -103,6 +110,15 @@ void Log::addPokemon(QString name)
     usrQuery->addBindValue(1);
     usrQuery->addBindValue(name);
     usrQuery->exec();
+    usrQuery->prepare("selcet number from player where ID = ?");
+    usrQuery->addBindValue(name);
+    usrQuery->exec();
+    qint32 oldnum = usrQuery->value(0).toInt();
+    oldnum++;
+    usrQuery->prepare("update player set number = ? where ID = ?");
+    usrQuery->addBindValue(oldnum);
+    usrQuery->addBindValue(name);
+    usrQuery->exec();
 }
 
 QList<QString>& Log::getUsr()
@@ -111,6 +127,7 @@ QList<QString>& Log::getUsr()
     QList<QString> *usr = new QList<QString>;
     qint32 i = 0;
     qint32 count = 0;
+    usr->append("1");
     for(usrQuery->first();usrQuery->seek(count);usrQuery->next())
     {
         while(usrQuery->value(i).toString() != "")
@@ -131,8 +148,30 @@ QList<QString>& Log::getUsr()
     return *usr;
 }
 
-//QList<QString>* Log::getPoke()
-//{
-
-//}
+QList<QString>& Log::getPoke()
+{
+    pokeQuery->exec("select * from pokemon");
+    QList<QString> *poke = new QList<QString>;
+    qint32 i = 0;
+    qint32 count = 0;
+    poke->append("0");
+    for(pokeQuery->first();pokeQuery->seek(count);pokeQuery->next())
+    {
+        while(pokeQuery->value(i).toString() != "")
+        {
+            if(i == 0)
+            {
+                i++;
+                continue;
+            }
+            poke->append(pokeQuery->value(i).toString());
+            i++;
+        }
+        i = 0;
+        count++;
+        poke->append("line");
+    }
+    poke->append("over");
+    return *poke;
+}
 

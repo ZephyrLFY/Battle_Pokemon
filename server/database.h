@@ -21,7 +21,7 @@ public:
     bool aliveOrNot(QString name);
     void linkStart(QString name);
     QList<QString>& getUsr();
-    //QList<QString>* getPoke();
+    QList<QString>& getPoke();
 public slots:
     void createConnection();
     bool freeConnection(QString name);

@@ -35,7 +35,7 @@ private slots:
 
     void userInfo(QString name,QHostAddress address);
 
-    //void pokeInfo(QHostAddress address);
+    void pokeInfo(QHostAddress address);
 
 private:
     Ui::udpReceiver *ui;
