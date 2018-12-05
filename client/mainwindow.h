@@ -27,7 +27,17 @@ private slots:
 
     void updateUsr(QList<QString> &usrInfo);
 
+    void updatePoke(QList<QString> &pokeInfo);
+
     void loseLink();
+
+    void on_lvlBtn_clicked();
+
+    void getUsrInfo(const QItemSelection&,const QItemSelection&);
+
+    void getPokeInfo(const QItemSelection&,const QItemSelection&);
+
+    void on_pokeBtn_clicked();
 
 private:
     Ui::MainWindow *ui;

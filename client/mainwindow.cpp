@@ -13,6 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
     receiver->bind(39962,QUdpSocket::ShareAddress);
     connect(receiver,SIGNAL(readyRead()),this,SLOT(processPendingDatagram()));
     on_usrBtn_clicked();
+    connect(ui->userInfo->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
+            this,SLOT(getUsrInfo(const QItemSelection&,const QItemSelection&)));
+    on_pokeBtn_clicked();
+    connect(ui->pokeInfo->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
+            this,SLOT(getPokeInfo(const QItemSelection&,const QItemSelection&)));
 }
 
 MainWindow::~MainWindow()
@@ -22,6 +27,20 @@ MainWindow::~MainWindow()
     delete sender;
     delete receiver;
     delete ui;
+}
+
+void MainWindow::getUsrInfo(const QItemSelection&,const QItemSelection&)
+{
+    QModelIndex temp = ui->userInfo->selectionModel()->currentIndex();
+    QVariant what = usrModel->data(temp);
+    myPoke = what.toString();
+}
+
+void MainWindow::getPokeInfo(const QItemSelection&,const QItemSelection&)
+{
+    QModelIndex temp = ui->pokeInfo->selectionModel()->currentIndex();
+    QVariant what = pokeModel->data(temp);
+    enmPoke = what.toString();
 }
 
 void MainWindow::loseLink()
@@ -61,26 +80,38 @@ void MainWindow::on_usrBtn_clicked()
     processPendingDatagram();
 }
 
+void MainWindow::on_pokeBtn_clicked()
+{
+    QList<QString> text;
+    text << "6" << usrName;
+    QByteArray temp;
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << text;
+    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
+    receiver->waitForReadyRead();
+    processPendingDatagram();
+}
+
 void MainWindow::updateUsr(QList<QString> &usrInfo)
 {
     qint32 i = 0;
     qint32 rowNum = usrInfo.count("line");
     bool color = false;
-    QStandardItemModel *model = new QStandardItemModel(this);
-    model->setColumnCount(12);
-    model->setRowCount(rowNum);
-    model->setHeaderData(0,Qt::Horizontal,"用户名");
-    model->setHeaderData(1,Qt::Horizontal,"胜率");
-    model->setHeaderData(2,Qt::Horizontal,"数量徽章");
-    model->setHeaderData(3,Qt::Horizontal,"精英徽章");
-    model->setHeaderData(4,Qt::Horizontal,"精灵数量");
-    model->setHeaderData(5,Qt::Horizontal,"小精灵1");
-    model->setHeaderData(6,Qt::Horizontal,"小精灵2");
-    model->setHeaderData(7,Qt::Horizontal,"小精灵3");
-    model->setHeaderData(8,Qt::Horizontal,"小精灵4");
-    model->setHeaderData(9,Qt::Horizontal,"小精灵5");
-    model->setHeaderData(10,Qt::Horizontal,"小精灵6");
-    model->setHeaderData(11,Qt::Horizontal,"小精灵7");
+    usrModel = new QStandardItemModel(this);
+    usrModel->setColumnCount(12);
+    usrModel->setRowCount(rowNum);
+    usrModel->setHeaderData(0,Qt::Horizontal,"用户名");
+    usrModel->setHeaderData(1,Qt::Horizontal,"胜率");
+    usrModel->setHeaderData(2,Qt::Horizontal,"数量徽章");
+    usrModel->setHeaderData(3,Qt::Horizontal,"精英徽章");
+    usrModel->setHeaderData(4,Qt::Horizontal,"精灵数量");
+    usrModel->setHeaderData(5,Qt::Horizontal,"小精灵1");
+    usrModel->setHeaderData(6,Qt::Horizontal,"小精灵2");
+    usrModel->setHeaderData(7,Qt::Horizontal,"小精灵3");
+    usrModel->setHeaderData(8,Qt::Horizontal,"小精灵4");
+    usrModel->setHeaderData(9,Qt::Horizontal,"小精灵5");
+    usrModel->setHeaderData(10,Qt::Horizontal,"小精灵6");
+    usrModel->setHeaderData(11,Qt::Horizontal,"小精灵7");
     for(qint32 row = 0; row < rowNum; row++)
     {
         qint32 alive = i + 1;
@@ -88,33 +119,75 @@ void MainWindow::updateUsr(QList<QString> &usrInfo)
             color = true;
         for(qint32 col = 0; col < 11; col++)
         {
-            if(usrInfo.at(i) == "line")
+            if(usrInfo.at(i) == "line")//换行
             {
                 i++;
                 break;
             }
-            else if(col == 3 || col == 4)
+            else if(col == 2)
+            {
+                qint32 num = usrInfo.at(i).toInt();
+                QString badge = nullptr;
+                if(num == 7)
+                    badge = "Gold";
+                else if(num > 4)
+                    badge = "Silver";
+                else if(num == 0)
+                    badge = "None";
+                else
+                    badge = "Copper";
+                QStandardItem *item = new QStandardItem(badge);
+                usrModel->setItem(row,col,item);
+            }
+            else if(col == 3)
                 continue;
             else
             {
-                if(alive == i)
+                if(alive == i)//在线情况
                     i++;
                 QStandardItem *item = new QStandardItem(usrInfo.at(i));
                 if(i == alive - 1 && color)
                     item->setBackground(QBrush(QColor(153,0,153)));
-                model->setItem(row,col,item);
+                usrModel->setItem(row,col,item);
                 i++;
             }
         }
         color = false;
     }
-
-    ui->userInfo->setModel(model);
+    ui->userInfo->setModel(usrModel);
     ui->userInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->userInfo->verticalHeader()->setVisible(false);
     ui->userInfo->resizeColumnsToContents();
-    //ui->userInfo->setSelectionMode(QAbstractItemView::SingleSelection);
-    //ui->userInfo->setSelectionBehavior(QAbstractItemView::SelectItems);
+    ui->userInfo->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->userInfo->setSelectionBehavior(QAbstractItemView::SelectItems);
+}
+
+void MainWindow::updatePoke(QList<QString> &pokeInfo)
+{
+    qint32 i = 0;
+    qint32 rowNum = pokeInfo.count("line");
+    pokeModel = new QStandardItemModel(this);
+    pokeModel->setColumnCount(2);
+    pokeModel->setRowCount(rowNum);
+    pokeModel->setHeaderData(0,Qt::Horizontal,"精灵名");
+    pokeModel->setHeaderData(1,Qt::Horizontal,"等级");
+    for(qint32 row = 0; row < rowNum; row++)
+    {
+        for(qint32 col = 0; col < 2; col++)
+        {
+            if(pokeInfo.at(i) == "line")
+                i++;
+            QStandardItem *item = new QStandardItem(pokeInfo.at(i));
+            pokeModel->setItem(row,col,item);
+            i++;
+        }
+    }
+    ui->pokeInfo->setModel(pokeModel);
+    ui->pokeInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->pokeInfo->verticalHeader()->setVisible(false);
+    ui->pokeInfo->resizeColumnsToContents();
+    ui->pokeInfo->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    ui->pokeInfo->setSelectionBehavior(QAbstractItemView::SelectItems);
 }
 
 void MainWindow::processPendingDatagram()
@@ -122,7 +195,7 @@ void MainWindow::processPendingDatagram()
     while(receiver->hasPendingDatagrams())
     {
        QByteArray datagram;
-       QList<QString> usrInfo;
+       QList<QString> infoM;
        datagram.resize(receiver->pendingDatagramSize());
        receiver->readDatagram(datagram.data(),datagram.size());
        ui->msgReceiver->setText(datagram);
@@ -133,8 +206,24 @@ void MainWindow::processPendingDatagram()
        else
            {
                QDataStream stream(&datagram, QIODevice::ReadOnly);
-               stream >> usrInfo;
-               updateUsr(usrInfo);
+               stream >> infoM;
+               qint32 temp = infoM.at(0).toInt();
+               infoM.removeFirst();
+               if(temp)
+               {
+                   updateUsr(infoM);
+               }
+               else
+               {
+                   updatePoke(infoM);
+               }
            }
     }
+}
+
+void MainWindow::on_lvlBtn_clicked()
+{
+    //QusrModelIndex index = ui->pokeInfo->currentIndex();
+    //QVariant data = ui->pokeInfo->
+    //QStandardItem *which = new QStandardItem(index);
 }

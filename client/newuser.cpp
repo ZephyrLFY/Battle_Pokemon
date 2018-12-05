@@ -41,6 +41,8 @@ void Newuser::on_loginBtn_clicked()
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << login;
     sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
+    receiver->waitForReadyRead();
+    dealDatagram();
     if(flag)
     {
         usrName = ui->usrLineEdit->text().toUtf8();
