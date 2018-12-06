@@ -2,6 +2,7 @@
 #define WIDEUSE_H
 #include <QString>
 #include <QStandardItemModel>
+#include <QGraphicsItem>
 
 extern QString usrName;
 extern QString enmPoke;
@@ -12,5 +13,6 @@ extern qint32 myLvl;
 extern qint32 myExp;
 extern QStandardItemModel *usrModel;
 extern QStandardItemModel *pokeModel;
+extern QGraphicsItem *a1;
 
 #endif // WIDEUSE_H

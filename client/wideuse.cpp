@@ -9,3 +9,4 @@ qint32 myLvl = 0;
 qint32 myExp = 0;
 QStandardItemModel *usrModel = nullptr;
 QStandardItemModel *pokeModel = nullptr;
+QGraphicsItem *a1 = nullptr;

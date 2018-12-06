@@ -5,6 +5,10 @@
 #include <QMessageBox>
 #include <QtNetwork>
 #include <QStandardItemModel>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsItem>
+#include <QKeyEvent>
 
 namespace Ui {
 class MainWindow;
@@ -39,11 +43,26 @@ private slots:
 
     void on_pokeBtn_clicked();
 
+    void on_action_triggered();
+
+    void on_action_2_triggered();
+
+    void initMap();
+
 private:
+    void initScene();
+    void initSceneBackground();
+    void keyPressEvent(QKeyEvent *e);
+    void keyUp();
+    void keyLeft();
+    void keyRight();
+    void keyDown();
     Ui::MainWindow *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
     bool state = 1;
+    QGraphicsScene *scene;
+    QGraphicsView *view;
 };
 
 #endif // MAINWINDOW_H
