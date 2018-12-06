@@ -127,7 +127,6 @@ QList<QString>& Log::getUsr()
     QList<QString> *usr = new QList<QString>;
     qint32 i = 0;
     qint32 count = 0;
-    usr->append("1");
     for(usrQuery->first();usrQuery->seek(count);usrQuery->next())
     {
         while(usrQuery->value(i).toString() != "")
@@ -154,7 +153,6 @@ QList<QString>& Log::getPoke()
     QList<QString> *poke = new QList<QString>;
     qint32 i = 0;
     qint32 count = 0;
-    poke->append("0");
     for(pokeQuery->first();pokeQuery->seek(count);pokeQuery->next())
     {
         while(pokeQuery->value(i).toString() != "")

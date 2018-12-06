@@ -100,7 +100,7 @@ void udpReceiver::userInfo(QString name,QHostAddress address)
     QList<QString> usrInfo = loger->getUsr();
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << usrInfo;
-    sender->writeDatagram(temp,address,39962);
+    sender->writeDatagram(temp,address,23232);
 }
 
 void udpReceiver::pokeInfo(QHostAddress address)
@@ -109,7 +109,7 @@ void udpReceiver::pokeInfo(QHostAddress address)
     QList<QString> pokeInfo = loger->getPoke();
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << pokeInfo;
-    sender->writeDatagram(temp,address,39962);
+    sender->writeDatagram(temp,address,23232);
 }
 
 void udpReceiver::dealDatagram()
