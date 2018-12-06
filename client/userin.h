@@ -30,6 +30,8 @@ private:
     QUdpSocket *sender;
     QUdpSocket *receiver;
     qint32 tOrF = 4;
+    quint16 rcv1Port;
+    quint16 sendPort;
 };
 
 #endif // USERIN_H

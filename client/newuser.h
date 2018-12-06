@@ -28,6 +28,8 @@ private:
     QUdpSocket *sender;
     QUdpSocket *receiver;
     bool flag;
+    quint16 rcv1Port;
+    quint16 sendPort;
 };
 
 #endif // NEWUSER_H

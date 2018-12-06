@@ -13,7 +13,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     sender = new QUdpSocket(this);
     receiver = new QUdpSocket(this);
-    receiver->bind(39962,QUdpSocket::ShareAddress);
+    rcv1Port = rcvPort;
+    while(!receiver->bind(rcv1Port,QUdpSocket::DontShareAddress))
+        rcv1Port = rcv1Port + 2;
+    sendPort = rcv1Port + 1;
+    sender->bind(sendPort,QUdpSocket::DontShareAddress);
     connect(receiver,SIGNAL(readyRead()),this,SLOT(processPendingDatagram()));
     //on_usrBtn_clicked();
     connect(ui->userInfo->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
@@ -52,7 +56,7 @@ void MainWindow::initMap()
     scene = new QGraphicsScene(this);
     initScene();
     view = new QGraphicsView(scene,this);
-    initSceneBackground();
+    //initSceneBackground();
     ui->wow->setViewport(view);
     a1 = new Man;
     House *h1 = new House(290,40);

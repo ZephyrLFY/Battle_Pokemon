@@ -10,3 +10,4 @@ qint32 myExp = 0;
 QStandardItemModel *usrModel = nullptr;
 QStandardItemModel *pokeModel = nullptr;
 QGraphicsItem *a1 = nullptr;
+quint16 rcvPort = 39962;

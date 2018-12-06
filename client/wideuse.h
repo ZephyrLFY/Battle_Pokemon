@@ -14,5 +14,6 @@ extern qint32 myExp;
 extern QStandardItemModel *usrModel;
 extern QStandardItemModel *pokeModel;
 extern QGraphicsItem *a1;
+extern quint16 rcvPort;
 
 #endif // WIDEUSE_H

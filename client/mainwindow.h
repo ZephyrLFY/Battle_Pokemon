@@ -60,6 +60,8 @@ private:
     Ui::MainWindow *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
+    quint16 rcv1Port;
+    quint16 sendPort;
     bool state = 1;
     QGraphicsScene *scene;
     QGraphicsView *view;

@@ -10,7 +10,11 @@ Newuser::Newuser(QWidget *parent) :
     ui->usrLineEdit->setFocus();
     sender = new QUdpSocket(this);
     receiver = new QUdpSocket(this);
-    receiver->bind(39962,QUdpSocket::ShareAddress);
+    rcv1Port = rcvPort;
+    while(!receiver->bind(rcv1Port,QUdpSocket::DontShareAddress))
+        rcv1Port = rcv1Port + 2;
+    sendPort = rcv1Port + 1;
+    sender->bind(sendPort,QUdpSocket::DontShareAddress);
     connect(receiver,SIGNAL(readyRead()),this,SLOT(dealDatagram()));
 }
 
@@ -40,7 +44,7 @@ void Newuser::on_loginBtn_clicked()
     QByteArray temp;
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << login;
-    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
+    sender->writeDatagram(temp,QHostAddress::Broadcast,sendPort);
     receiver->waitForReadyRead();
     dealDatagram();
     if(flag)

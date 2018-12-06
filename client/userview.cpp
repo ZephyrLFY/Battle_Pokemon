@@ -9,7 +9,11 @@ userView::userView(QWidget *parent) :
     ui->setupUi(this);
     sender = new QUdpSocket(this);
     receiver = new QUdpSocket(this);
-    receiver->bind(23232,QUdpSocket::ShareAddress);
+    rcv1Port = rcvPort + 1000;
+    while(!receiver->bind(rcv1Port,QUdpSocket::DontShareAddress))
+        rcv1Port = rcv1Port + 2;
+    sendPort = rcv1Port + 1;
+    sender->bind(sendPort,QUdpSocket::DontShareAddress);
     connect(receiver,SIGNAL(readyRead()),this,SLOT(processPendingDatagram()));
     getUsr();
 }

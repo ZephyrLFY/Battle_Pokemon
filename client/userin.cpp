@@ -9,7 +9,11 @@ UserIn::UserIn(QWidget *parent) :
     ui->setupUi(this);
     sender = new QUdpSocket(this);
     receiver = new QUdpSocket(this);
-    receiver->bind(39962,QUdpSocket::ShareAddress);
+    rcv1Port = rcvPort;
+    while(!receiver->bind(rcv1Port,QUdpSocket::DontShareAddress))
+        rcv1Port = rcv1Port + 2;
+    sendPort = rcv1Port + 1;
+    sender->bind(sendPort,QUdpSocket::DontShareAddress);
 }
 
 UserIn::~UserIn()

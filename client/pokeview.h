@@ -29,6 +29,8 @@ private:
     Ui::pokeView *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
+    quint16 rcv1Port;
+    quint16 sendPort;
 };
 
 #endif // POKEVIEW_H
