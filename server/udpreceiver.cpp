@@ -8,10 +8,11 @@ udpReceiver::udpReceiver(QWidget *parent) :
 {
     ui->setupUi(this);
     receiver = new QUdpSocket(this);
-    receiver->bind(45454,QUdpSocket::ShareAddress);
+    sender = new QUdpSocket(this);
+    receiver->bind(rcvPort,QUdpSocket::DontShareAddress);
+    sender->bind(sendPort,QUdpSocket::DontShareAddress);
     loger = new Log;
     connect(receiver,SIGNAL(readyRead()),this,SLOT(dealDatagram()));
-    sender = new QUdpSocket(this);
 }
 
 udpReceiver::~udpReceiver()
@@ -27,7 +28,7 @@ void udpReceiver::on_sendBtn_clicked()
     sender->writeDatagram(sendMsg.toUtf8(),QHostAddress("10.8.162.229"),39962);
 }
 
-void udpReceiver::usrs(int inOrNew,QString name,QString pwd,QHostAddress address)
+void udpReceiver::usrs(int inOrNew,QString name,QString pwd,QHostAddress address,quint16 hisPort)
 {
     QByteArray sendgram;
     if(inOrNew == 1)
@@ -49,7 +50,7 @@ void udpReceiver::usrs(int inOrNew,QString name,QString pwd,QHostAddress address
         else        
             sendgram = "0";
     }
-    sender->writeDatagram(sendgram,address,39962);
+    sender->writeDatagram(sendgram,address,hisPort);
 }
 
 
@@ -88,38 +89,42 @@ void udpReceiver::txShow(QString text)
     ui->label->setText(text);
 }
 
-void udpReceiver::linkOver(QString name,QHostAddress address)
+void udpReceiver::linkOver(QString name,QHostAddress address,quint16 hisPort)
 {
     loger->freeConnection(name);
-    sender->writeDatagram("1",address,39962);
+    sender->writeDatagram("1",address,hisPort);
 }
 
-void udpReceiver::userInfo(QString name,QHostAddress address)
+void udpReceiver::userInfo(QString name,QHostAddress address,quint16 hisPort)
 {
     QByteArray temp;
     QList<QString> usrInfo = loger->getUsr();
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << usrInfo;
-    sender->writeDatagram(temp,address,23232);
+    sender->writeDatagram(temp,address,hisPort);
 }
 
-void udpReceiver::pokeInfo(QHostAddress address)
+void udpReceiver::pokeInfo(QHostAddress address,quint16 hisPort)
 {
     QByteArray temp;
     QList<QString> pokeInfo = loger->getPoke();
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << pokeInfo;
-    sender->writeDatagram(temp,address,23232);
+    sender->writeDatagram(temp,address,hisPort);
 }
 
 void udpReceiver::dealDatagram()
 {
     QHostAddress *sendIp = new QHostAddress;
+    quint16 *hisPort = new quint16;
+    quint16 sendBack;
     while(receiver->hasPendingDatagrams())
     {
         QByteArray datagram;
         datagram.resize(receiver->pendingDatagramSize());
-        receiver->readDatagram(datagram.data(),datagram.size(),sendIp);
+        receiver->readDatagram(datagram.data(),datagram.size(),sendIp,hisPort);
+        sendBack = *hisPort;
+        sendBack = sendBack - 1;
         QList<QString> toDo;
         QDataStream stream(&datagram, QIODevice::ReadWrite);
         stream >> toDo;
@@ -129,7 +134,7 @@ void udpReceiver::dealDatagram()
         case 1:
         case 2:
         {
-            usrs(which,toDo.at(1),toDo.at(2),*sendIp);
+            usrs(which,toDo.at(1),toDo.at(2),*sendIp,sendBack);
             break;
         }
         case 3:
@@ -139,17 +144,17 @@ void udpReceiver::dealDatagram()
         }
         case 4:
         {
-            linkOver(toDo.at(1),*sendIp);
+            linkOver(toDo.at(1),*sendIp,sendBack);
             break;
         }
         case 5:
         {
-            userInfo(toDo.at(1),*sendIp);
+            userInfo(toDo.at(1),*sendIp,sendBack);
             break;
         }
         case 6:
         {
-            pokeInfo(*sendIp);
+            pokeInfo(*sendIp,sendBack);
             break;
         }
         }
