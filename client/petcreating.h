@@ -12,26 +12,33 @@ class pokemon : public QObject
 public:
     pokemon();//构造函数，初始化一个默认小精灵
     bool alive();//存活情况
-    virtual void attack() = 0;//攻击函数，根据类型有不同
+    virtual QString attack() = 0;//攻击函数，根据类型有不同
     double atkf();//攻击频率
-    double damagecost();//造成伤害
-    void damagedeal(double damage,qint32 ran);//计算伤害，修改血量
-    void changetype();//实例化精灵时根据类型而调节属性
+    int damagecost();//造成伤害
+    QString damagedeal(int damage,qint32 ran);//计算伤害，修改血量
+    void changetype(int type);//实例化精灵时根据类型而调节属性
+    void changeName(QString name);
     void expup(qint32 bonus);//获得经验值
     int gain();//对方会获得多少经验值
     bool upornot();//经验是否满足升级
     void lvlup();//升级
     void hpfull();//回满血
-    int type = 0;//小精灵类型
+    QString getName();
     void Test();//测试函数
+    int getHp();
+    int getFullHp();
+signals:
+    void fresh();
 private:
+    int type;
     int level;//等级
     int exp;//经验
-    double atk;//攻击力
+    int atk;//攻击力
     int def;//防御力
-    double hp;//血量
+    int hp;//血量
     int fullhp;//满血量
     double interval;//攻击间隔
+    QString name;
 };
 
 class str_pkm : public pokemon//力量型
@@ -49,97 +56,97 @@ class agi_pkm : public pokemon//敏捷型
 class Hitmonlee : public str_pkm//沙瓦朗
 {
 public:
-    void attack();
-private:
-    QString name = "Hitmonlee";
+    Hitmonlee(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Charmander : public str_pkm//小火龙
 {
 public:
-    void attack();
-private:
-    QString name = "Charmander";
+    Charmander(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Squirtle : public str_pkm//杰尼龟
 {
 public:
-    void attack();
-private:
-    QString name = "Squirtle";
+    Squirtle(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Licktung : public fat_pkm//大舌头
 {
 public:
-    void attack();
-private:
-    QString name = "Licktung";
+    Licktung(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Muk : public fat_pkm//臭臭泥
 {
 public:
-    void attack();
-private:
-    QString name = "Muk";
+    Muk(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Krabby : public fat_pkm//大钳蟹
 {
 public:
-    void attack();
-private:
-    QString name = "Krabby";
+    Krabby(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Geodude : public def_pkm//小拳石
 {
 public:
-    void attack();
-private:
-    QString name = "Geodude";
+    Geodude(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Shellder :public def_pkm//大舌贝
 {
 public:
-    void attack();
-private:
-    QString name = "Shellder";
+    Shellder(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Onix : public def_pkm//大岩蛇
 {
 public:
-    void attack();
-private:
-    QString name = "Onix";
+    Onix(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Bulbasaur : public agi_pkm//妙蛙种子
 {
 public:
-    void attack();
-private:
-    QString name = "Bulbasaur";
+    Bulbasaur(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Pidgeotto : public agi_pkm//比比鸟
 {
 public:
-    void attack();
-private:
-    QString name = "Pidgeotto";
+    Pidgeotto(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 class Pikachu : public agi_pkm//皮卡丘
 {
 public:
-    void attack();
-private:
-    QString name = "Pikachu";
+    Pikachu(int lvl,int exp);
+    QString attack();
+    void setName();
 };
 
 pokemon* chooseyourpet();

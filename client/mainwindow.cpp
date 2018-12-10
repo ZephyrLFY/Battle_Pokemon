@@ -5,26 +5,16 @@
 #include "userview.h"
 #include "pokeview.h"
 #include "mymap.h"
+#include "prebtl.h"
+#include "battleground.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    sender = new QUdpSocket(this);
-    receiver = new QUdpSocket(this);
-    rcv1Port = rcvPort;
-    while(!receiver->bind(rcv1Port,QUdpSocket::DontShareAddress))
-        rcv1Port = rcv1Port + 2;
-    sendPort = rcv1Port + 1;
-    sender->bind(sendPort,QUdpSocket::DontShareAddress);
-    connect(receiver,SIGNAL(readyRead()),this,SLOT(processPendingDatagram()));
-    //on_usrBtn_clicked();
-    connect(ui->userInfo->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
-            this,SLOT(getUsrInfo(const QItemSelection&,const QItemSelection&)));
-    //on_pokeBtn_clicked();
-    connect(ui->pokeInfo->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&,const QItemSelection&)),
-            this,SLOT(getPokeInfo(const QItemSelection&,const QItemSelection&)));
+    bindPort();
+    initLocalUser();
     initMap();
 }
 
@@ -34,7 +24,34 @@ MainWindow::~MainWindow()
         loseLink();
     delete sender;
     delete receiver;
+    delete zhi;
+    scene->clear();
+    delete scene;
     delete ui;
+}
+
+void MainWindow::bindPort()
+{
+    sender = new QUdpSocket(this);
+    receiver = new QUdpSocket(this);
+    rcv1Port = rcvPort;
+    while(!receiver->bind(rcv1Port,QUdpSocket::DontShareAddress))
+        rcv1Port = rcv1Port + 2;
+    sendPort = rcv1Port + 1;
+    sender->bind(sendPort,QUdpSocket::DontShareAddress);
+    connect(receiver,SIGNAL(readyRead()),this,SLOT(processPendingDatagram()));
+}
+
+void MainWindow::initLocalUser()
+{
+    QList<QString> text;
+    text << "7" << localUser->getName();
+    QByteArray temp;
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << text;
+    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
+    receiver->waitForReadyRead();
+    processPendingDatagram();
 }
 
 void MainWindow::initScene()
@@ -42,30 +59,21 @@ void MainWindow::initScene()
     scene->setSceneRect(100 , 20 , 400, 250);
 }
 
-void MainWindow::initSceneBackground()
-{
-    QPixmap bg(25, 25);
-    QPainter p(&bg);
-    p.setBrush(QBrush(Qt::gray));
-    p.drawRect(0, 0, 25 ,25);
-    view->setBackgroundBrush(QBrush(bg));
-}
-
 void MainWindow::initMap()
 {
     scene = new QGraphicsScene(this);
     initScene();
-    view = new QGraphicsView(scene,this);
-    //initSceneBackground();
-    ui->wow->setViewport(view);
-    a1 = new Man;
-    House *h1 = new House(290,40);
-    House *h2 = new House(470,120);
-    House *h3 = new House(130,230);
-    scene->addItem(a1);
-    scene->addItem(h1);
-    scene->addItem(h2);
-    scene->addItem(h3);
+    ui->wow->setScene(scene);
+    zhi = new Man;
+    Arena *arena = new Arena(290,40);
+    Gym *gym = new Gym(470,120);
+    Music *music = new Music(360,240);
+    Exit *exit = new Exit(130,230);
+    scene->addItem(zhi);
+    scene->addItem(arena);
+    scene->addItem(gym);
+    scene->addItem(music);
+    scene->addItem(exit);
     scene->setFocus();
 }
 
@@ -73,86 +81,186 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
 {
     switch (e->key())
     {
-    case Qt::Key_Up:keyUp();break;
-    case Qt::Key_Left:keyLeft();break;
-    case Qt::Key_Right:keyRight();break;
-    case Qt::Key_Down:keyDown();break;
     case Qt::Key_W:keyUp();break;
     case Qt::Key_A:keyLeft();break;
     case Qt::Key_D:keyRight();break;
     case Qt::Key_S:keyDown();break;
     default:break;
     }
-    qDebug() << a1->pos() << endl;
+    //qDebug() << zhi->pos() << endl;
 }
 
 void MainWindow::keyUp()
 {
-    a1->moveBy(0,-10);
-    //if(a1->pos().ry() < 60 && a1->pos().rx() >= 250 && a1->pos().rx() <= 310)
-    if(a1->pos().ry() < 250 &&a1->pos().ry() > 190 && a1->pos().rx() <= 150 && a1->pos().rx() >= 90)
+    zhi->moveBy(0,-10);
+    if(zhi->pos().ry() < 250 &&zhi->pos().ry() > 190 && zhi->pos().rx() <= 150 && zhi->pos().rx() >= 90)
     {
         on_logoutBtn_clicked();
-        a1->setPos(120,170);
+        zhi->setPos(290,120);
     }
-    if(a1->pos().ry() < -10)
-        a1->setY(270);
+    if(zhi->pos().ry() < 60 &&zhi->pos().ry() > 0 && zhi->pos().rx() <= 310 && zhi->pos().rx() >= 250)
+    {
+        on_btlBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < 140 &&zhi->pos().ry() > 80 && zhi->pos().rx() <= 490 && zhi->pos().rx() >= 430)
+    {
+        on_lvlBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < 260 &&zhi->pos().ry() > 200 && zhi->pos().rx() <= 380 && zhi->pos().rx() >= 320)
+    {
+        on_musicBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < -10)
+        zhi->setY(270);
 }
 
 void MainWindow::keyDown()
 {
-    a1->moveBy(0,10);
-    if(a1->pos().ry() < 250 && a1->pos().ry() > 190 && a1->pos().rx() <= 150 && a1->pos().rx() >= 90)
+    zhi->moveBy(0,10);
+    if(zhi->pos().ry() < 250 && zhi->pos().ry() > 190 && zhi->pos().rx() <= 150 && zhi->pos().rx() >= 90)
     {
         on_logoutBtn_clicked();
-        a1->setPos(120,260);
+        zhi->setPos(290,120);
     }
-    if(a1->pos().ry() > 270)
-        a1->setY(-10);
+    if(zhi->pos().ry() < 60 &&zhi->pos().ry() > 0 && zhi->pos().rx() <= 310 && zhi->pos().rx() >= 250)
+    {
+        on_btlBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < 140 &&zhi->pos().ry() > 80 && zhi->pos().rx() <= 490 && zhi->pos().rx() >= 430)
+    {
+        on_lvlBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < 260 &&zhi->pos().ry() > 200 && zhi->pos().rx() <= 380 && zhi->pos().rx() >= 320)
+    {
+        on_musicBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() > 270)
+        zhi->setY(-10);
 }
 
 void MainWindow::keyRight()
 {
-    a1->moveBy(10,0);
-    if(a1->pos().rx() > 90 && a1->pos().rx() < 150 && a1->pos().ry() >= 190 && a1->pos().ry() <= 250)
+    zhi->moveBy(10,0);
+    if(zhi->pos().rx() > 90 && zhi->pos().rx() < 150 && zhi->pos().ry() >= 190 && zhi->pos().ry() <= 250)
     {
         on_logoutBtn_clicked();
-        a1->setPos(160,220);
+        zhi->setPos(290,120);
     }
-    if(a1->pos().rx() > 490)
-        a1->setX(80);
+    if(zhi->pos().ry() < 60 &&zhi->pos().ry() > 0 && zhi->pos().rx() <= 310 && zhi->pos().rx() >= 250)
+    {
+        on_btlBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < 140 &&zhi->pos().ry() > 80 && zhi->pos().rx() <= 490 && zhi->pos().rx() >= 430)
+    {
+        on_lvlBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < 260 &&zhi->pos().ry() > 200 && zhi->pos().rx() <= 380 && zhi->pos().rx() >= 320)
+    {
+        on_musicBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().rx() > 490)
+        zhi->setX(80);
 }
 
 void MainWindow::keyLeft()
 {
-    a1->moveBy(-10,0);
-    if(a1->pos().rx() > 90 && a1->pos().rx() < 150 && a1->pos().ry() >= 190 && a1->pos().ry() <= 250)
+    zhi->moveBy(-10,0);
+    if(zhi->pos().rx() > 90 && zhi->pos().rx() < 150 && zhi->pos().ry() >= 190 && zhi->pos().ry() <= 250)
     {
         on_logoutBtn_clicked();
-        a1->setPos(480,220);
+        zhi->setPos(290,120);
     }
-    if(a1->pos().rx() < 80)
-        a1->setX(490);
+    if(zhi->pos().ry() < 60 &&zhi->pos().ry() > 10 && zhi->pos().rx() <= 310 && zhi->pos().rx() >= 250)
+    {
+        on_btlBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < 140 &&zhi->pos().ry() > 80 && zhi->pos().rx() <= 490 && zhi->pos().rx() >= 430)
+    {
+        on_lvlBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().ry() < 260 &&zhi->pos().ry() > 200 && zhi->pos().rx() <= 380 && zhi->pos().rx() >= 320)
+    {
+        on_musicBtn_clicked();
+        zhi->setPos(290,120);
+    }
+    if(zhi->pos().rx() < 80)
+        zhi->setX(490);
 }
 
-void MainWindow::getUsrInfo(const QItemSelection&,const QItemSelection&)
+void MainWindow::on_lvlBtn_clicked()
 {
-    QModelIndex temp = ui->userInfo->selectionModel()->currentIndex();
-    QVariant what = usrModel->data(temp);
-    myPoke = what.toString();
+    localUser->whichBattle(1);
+    if(isMusic)
+        player->pause();
+    preBtl lvlup;
+    if(lvlup.exec() == QDialog::Accepted)
+    {
+        Battleground *btl = new Battleground;
+        btl->exec();
+    }
+    else
+    {
+        if(isMusic)
+            player->play();
+    }
 }
 
-void MainWindow::getPokeInfo(const QItemSelection&,const QItemSelection&)
+void MainWindow::on_action_triggered()
 {
-    QModelIndex temp = ui->pokeInfo->selectionModel()->currentIndex();
-    QVariant what = pokeModel->data(temp);
-    enmPoke = what.toString();
+    userView viewer;
+    viewer.exec();
+}
+
+void MainWindow::on_action_2_triggered()
+{
+    pokeView viewer;
+    viewer.exec();
+}
+
+void MainWindow::on_musicBtn_clicked()
+{
+    if(!isMusic)
+    {
+        player = new QMediaPlayer(this);
+        playlist = new QMediaPlaylist(this);
+        playlist->setPlaybackMode(QMediaPlaylist::Loop);
+        playlist->addMedia(QUrl::fromLocalFile("/Users/zephyr/Desktop/TOEFL/bgm1.mp3"));
+        playlist->addMedia(QUrl::fromLocalFile("/Users/zephyr/Desktop/TOEFL/bgm2.mp3"));
+        player->setPlaylist(playlist);
+        player->play();
+        isMusic = 1;
+        isPlaying = 1;
+    }
+    else
+    {
+        if(isPlaying)
+        {
+            player->pause();
+            isPlaying = 0;
+        }
+        else
+        {
+            player->play();
+            isPlaying = 1;
+        }
+    }
 }
 
 void MainWindow::loseLink()
 {
     QList<QString> text;
-    text << "4" << usrName;
+    text << "4" << localUser->getName();
     QByteArray temp;
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << text;
@@ -174,173 +282,39 @@ void MainWindow::on_logoutBtn_clicked()
     }
 }
 
-void MainWindow::on_usrBtn_clicked()
-{
-    QList<QString> text;
-    text << "5" << usrName;
-    QByteArray temp;
-    QDataStream stream(&temp, QIODevice::WriteOnly);
-    stream << text;
-    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
-    receiver->waitForReadyRead();
-    processPendingDatagram();
-}
-
-void MainWindow::on_pokeBtn_clicked()
-{
-    QList<QString> text;
-    text << "6" << usrName;
-    QByteArray temp;
-    QDataStream stream(&temp, QIODevice::WriteOnly);
-    stream << text;
-    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
-    receiver->waitForReadyRead();
-    processPendingDatagram();
-}
-
-void MainWindow::updateUsr(QList<QString> &usrInfo)
-{
-    qint32 i = 0;
-    qint32 rowNum = usrInfo.count("line");
-    bool color = false;
-    usrModel = new QStandardItemModel(this);
-    usrModel->setColumnCount(12);
-    usrModel->setRowCount(rowNum);
-    usrModel->setHeaderData(0,Qt::Horizontal,"用户名");
-    usrModel->setHeaderData(1,Qt::Horizontal,"胜率");
-    usrModel->setHeaderData(2,Qt::Horizontal,"数量徽章");
-    usrModel->setHeaderData(3,Qt::Horizontal,"精英徽章");
-    usrModel->setHeaderData(4,Qt::Horizontal,"精灵数量");
-    usrModel->setHeaderData(5,Qt::Horizontal,"小精灵1");
-    usrModel->setHeaderData(6,Qt::Horizontal,"小精灵2");
-    usrModel->setHeaderData(7,Qt::Horizontal,"小精灵3");
-    usrModel->setHeaderData(8,Qt::Horizontal,"小精灵4");
-    usrModel->setHeaderData(9,Qt::Horizontal,"小精灵5");
-    usrModel->setHeaderData(10,Qt::Horizontal,"小精灵6");
-    usrModel->setHeaderData(11,Qt::Horizontal,"小精灵7");
-    for(qint32 row = 0; row < rowNum; row++)
-    {
-        qint32 alive = i + 1;
-        if(usrInfo.at(alive) == "1")
-            color = true;
-        for(qint32 col = 0; col < 11; col++)
-        {
-            if(usrInfo.at(i) == "line")//换行
-            {
-                i++;
-            }
-            else if(col == 2)
-            {
-                qint32 num = usrInfo.at(i).toInt();
-                QString badge = nullptr;
-                if(num == 7)
-                    badge = "Gold";
-                else if(num > 4)
-                    badge = "Silver";
-                else if(num == 0)
-                    badge = "None";
-                else
-                    badge = "Copper";
-                QStandardItem *item = new QStandardItem(badge);
-                usrModel->setItem(row,col,item);
-            }
-            else if(col == 3)
-                continue;
-            else
-            {
-                if(alive == i)//在线情况
-                    i++;
-                QStandardItem *item = new QStandardItem(usrInfo.at(i));
-                if(i == alive - 1 && color)
-                    item->setBackground(QBrush(QColor(153,0,153)));
-                usrModel->setItem(row,col,item);
-                i++;
-            }
-        }
-        color = false;
-    }
-    ui->userInfo->setModel(usrModel);
-    ui->userInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->userInfo->verticalHeader()->setVisible(false);
-    ui->userInfo->resizeColumnsToContents();
-    ui->userInfo->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->userInfo->setSelectionBehavior(QAbstractItemView::SelectItems);
-}
-
-void MainWindow::updatePoke(QList<QString> &pokeInfo)
-{
-    qint32 i = 0;
-    qint32 rowNum = pokeInfo.count("line");
-    pokeModel = new QStandardItemModel(this);
-    pokeModel->setColumnCount(2);
-    pokeModel->setRowCount(rowNum);
-    pokeModel->setHeaderData(0,Qt::Horizontal,"精灵名");
-    pokeModel->setHeaderData(1,Qt::Horizontal,"等级");
-    for(qint32 row = 0; row < rowNum; row++)
-    {
-        for(qint32 col = 0; col < 2; col++)
-        {
-            if(pokeInfo.at(i) == "line")
-                i++;
-            QStandardItem *item = new QStandardItem(pokeInfo.at(i));
-            pokeModel->setItem(row,col,item);
-            i++;
-        }
-    }
-    ui->pokeInfo->setModel(pokeModel);
-    ui->pokeInfo->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->pokeInfo->verticalHeader()->setVisible(false);
-    ui->pokeInfo->resizeColumnsToContents();
-    ui->pokeInfo->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    ui->pokeInfo->setSelectionBehavior(QAbstractItemView::SelectItems);
-}
-
 void MainWindow::processPendingDatagram()
 {
     while(receiver->hasPendingDatagrams())
     {
        QByteArray datagram;
-       QList<QString> infoM;
        datagram.resize(receiver->pendingDatagramSize());
        receiver->readDatagram(datagram.data(),datagram.size());
-       ui->msgReceiver->setText(datagram);
        if(datagram.size() == 1)
            if(QString::fromUtf8(datagram) == "0")
                state = 0;
            else;
        else
-           {
-               QDataStream stream(&datagram, QIODevice::ReadOnly);
-               stream >> infoM;
-               qint32 temp = infoM.at(0).toInt();
-               infoM.removeFirst();
-               if(temp)
-               {
-                   updateUsr(infoM);
-               }
-               else
-               {
-                   updatePoke(infoM);
-               }
-           }
+       {
+           QList<QString> infoM;
+           QDataStream stream(&datagram, QIODevice::ReadOnly);
+           stream >> infoM;
+           infoM.removeFirst();
+           localUser->initUsr(infoM);
+       }
     }
 }
 
-void MainWindow::on_lvlBtn_clicked()
-{
-    //QusrModelIndex index = ui->pokeInfo->currentIndex();
-    //QVariant data = ui->pokeInfo->
-    //QStandardItem *which = new QStandardItem(index);
-}
 
-void MainWindow::on_action_triggered()
+void MainWindow::on_btlBtn_clicked()
 {
-    userView viewer;
-    viewer.exec();
-}
-
-void MainWindow::on_action_2_triggered()
-{
-    pokeView viewer;
-    viewer.exec();
+    if(!isMusic)
+        return;
+    else
+    {
+        int currentIndex = playlist->currentIndex();
+        if(++currentIndex==playlist->mediaCount())
+            currentIndex=0;
+        playlist->setCurrentIndex(currentIndex);
+        player->play();
+    }
 }

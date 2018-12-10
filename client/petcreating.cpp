@@ -2,51 +2,60 @@
 #define random(a,b) (rand()%(b-a+1)+a)
 using namespace std;
 
-void beat(pokemon &a,pokemon&b,qint32 ran)//攻击函数，攻击者和被攻击者
-{
-    a.attack();
-    b.damagedeal(a.damagecost(),ran);
-}
+//void beat(pokemon &a,pokemon&b,qint32 ran)//攻击函数，攻击者和被攻击者
+//{
+//    QString temp = b.damagedeal(a.damagecost(),ran);
+////    if(ran == 0)
+////        ui->enmInfo->setText(temp);
+////    else
+////        ui->myInfo->setText(temp);
+//}
 
-void result(pokemon &a,pokemon &b)
-{
-    if((!a.alive())&&(!b.alive()))
-        qDebug() << "Both of them are dead." << endl;
-    else if(a.alive())
-    {
-        qDebug() << "Congratulations! Your pet wins!" << endl;
-        a.expup(b.gain());
-        qDebug() << "You gain " << b.gain() << " exp." << endl;
-        if(a.upornot())
-            a.lvlup();
-    }
-    else
-        qDebug() << "Sorry, your pet is dead." << endl;
-}
+//void result(pokemon &a,pokemon &b)
+//{
+//    if((!a.alive())&&(!b.alive()))
+//        qDebug() << "Both of them are dead." << endl;
+//    else if(a.alive())
+//    {
+//        qDebug() << "Congratulations! Your pet wins!" << endl;
+//        a.expup(b.gain());
+//        qDebug() << "You gain " << b.gain() << " exp." << endl;
+//        if(a.upornot())
+//            a.lvlup();
+//    }
+//    else
+//        qDebug() << "Sorry, your pet is dead." << endl;
+//}
 
-void battle(pokemon &a,pokemon &b)/*根据时间以及攻击间隔，互相攻击*/
-{
-    clock_t a_delay = a.atkf() * CLOCKS_PER_SEC;
-    clock_t b_delay = b.atkf() * CLOCKS_PER_SEC;
-    clock_t a_start = clock();
-    clock_t b_start = clock();
-    while(a.alive()&&b.alive())
-    {
-        while((clock()-a_start < a_delay)&&(clock()-b_start < b_delay))
-            ;
-        if(clock()-a_start >= a_delay)
-        {
-            beat(a,b,0);
-            a_start = clock();
-        }
-        if(clock()-b_start >= b_delay)
-        {
-            beat(b,a,1234);
-            b_start = clock();
-        }
-    }
-    //result(a,b);
-}
+//void battle(pokemon &a,pokemon &b)/*根据时间以及攻击间隔，互相攻击*/
+//{
+//    clock_t a_delay = a.atkf() * CLOCKS_PER_SEC;
+//    clock_t b_delay = b.atkf() * CLOCKS_PER_SEC;
+//    clock_t a_start = clock();
+//    clock_t b_start = clock();
+//    while(a.alive()&&b.alive())
+//    {
+//        while((clock()-a_start < a_delay)&&(clock()-b_start < b_delay))
+//        {
+////            ui->myInfo->setText("1");
+////            ui->enmInfo->setText("2");
+//            ;
+//        }
+//        if(clock() - a_start >= a_delay)
+//        {
+//            beat(a,b,0);
+//            a_start = clock();
+//        }
+//        if(clock()-b_start >= b_delay)
+//        {
+//            beat(b,a,1234);
+//            b_start = clock();
+//        }
+//    }
+//    result(a,b);
+//    a.hpfull();
+//    b.hpfull();
+//}
 
 pokemon::pokemon()
 {
@@ -59,8 +68,14 @@ pokemon::pokemon()
     this->interval = 1;
 }
 
-void pokemon::changetype()
+QString pokemon::getName()
 {
+    return this->name;
+}
+
+void pokemon::changetype(int type)
+{
+    this->type = type;
     if(type == 1)//力量型
     {
         atk += 4;
@@ -86,6 +101,11 @@ void pokemon::changetype()
     }
 }
 
+void pokemon::changeName(QString name)
+{
+    this->name = name;
+}
+
 bool pokemon::alive()
 {
     if(hp > 0)
@@ -99,13 +119,15 @@ double pokemon::atkf()
     return interval;
 }
 
-double pokemon::damagecost()
+int pokemon::damagecost()
 {
     return atk;
 }
 
-void pokemon::damagedeal(double damage,qint32 ran)
+QString pokemon::damagedeal(int damage,qint32 ran)
 {
+    QString action;
+    QString mation;
     damage = damage - def;
     if(damage < 0)
         damage = 0;
@@ -117,7 +139,7 @@ void pokemon::damagedeal(double damage,qint32 ran)
         if(type == 4)
         {
             damage = 0;
-            qDebug() << "被闪避了! ";
+            action = "闪避了! ";
             isDodge = 1;
         }
         else
@@ -125,7 +147,7 @@ void pokemon::damagedeal(double damage,qint32 ran)
             if(damage <= 5)
             {
                 damage = 0;
-                qDebug() << "被闪避了! ";
+                action = "闪避了! ";
                 isDodge = 1;
             }
             else;
@@ -137,14 +159,16 @@ void pokemon::damagedeal(double damage,qint32 ran)
         int crush = qrand() % 100;
         if(crush > 90)
         {
-            damage = damage * 1.5;
-            qDebug() << "造成了暴击! ";
+            damage = damage * 2;
+            action = "暴击! ";
         }
     }
     hp = hp - damage;
-    qDebug() << "造成了" << damage << "点伤害。" << endl;
+    QString howMany = QString::number(damage);
     if(hp < 0)
         hp = 0;
+    emit fresh();
+    return action + " " + mation + ("受到了" + howMany + "点伤害。");
 }
 
 void pokemon::hpfull()
@@ -172,7 +196,6 @@ bool pokemon::upornot()
 
 void pokemon::lvlup()//升级函数，根据精灵类型会有不同
 {
-    qDebug() << "Level up!" << endl;
     level++;
     exp = 0;
     hpfull();
@@ -212,64 +235,182 @@ void pokemon::Test()
     qDebug() << hp << " " << atk << " " << def << " " << interval << endl;
 }
 
-void Hitmonlee::attack()
+int pokemon::getHp()
 {
-    qDebug() << "Hitmonlee : \"Hit!\"";
+    return hp;
 }
 
-void Charmander::attack()
+int pokemon::getFullHp()
 {
-    qDebug() << "Charmander : \"Fire!\"";
+    return fullhp;
 }
 
-void Squirtle::attack()
+Hitmonlee::Hitmonlee(int lvl,int exp)
 {
-    qDebug() << "Squirtle : \"Taste my water!\"";
+    changetype(1);
+    changeName("Hitmonlee");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Licktung::attack()
+Charmander::Charmander(int lvl,int exp)
 {
-    qDebug() << "Licktung : \"Lick, lick!\"";
+    changetype(1);
+    changeName("Charmander");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Muk::attack()
+Squirtle::Squirtle(int lvl,int exp)
 {
-    qDebug() << "Muk : \"Eat my gross muk!\"";
+    changetype(1);
+    changeName("Squirtle");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Krabby::attack()
+Licktung::Licktung(int lvl,int exp)
 {
-    qDebug() << "Krabby : \"No one can live under my claw!\"";
+    changetype(2);
+    changeName("Licktung");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Geodude::attack()
+Muk::Muk(int lvl,int exp)
 {
-    qDebug() << "Geodude : \"Stone power!\"";
+    changetype(2);
+    changeName("Muk");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Shellder::attack()
+Krabby::Krabby(int lvl,int exp)
 {
-    qDebug() << "Shellder : \"Shield smash!\"";
+    changetype(2);
+    changeName("Krabby");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Onix::attack()
+Geodude::Geodude(int lvl,int exp)
 {
-    qDebug() << "Onix : \"You will die for your arrogance!\"";
+    changetype(3);
+    changeName("Geodude");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Bulbasaur::attack()
+Shellder::Shellder(int lvl,int exp)
 {
-    qDebug() << "Bulbasaur : \"Eat my seed!\"";
+    changetype(3);
+    changeName("Shellder");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Pidgeotto::attack()
+Onix::Onix(int lvl,int exp)
 {
-    qDebug() << "Pidgeotto : \"Can you defend my air attack?\"";
+    changetype(3);
+    changeName("Onix");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
 }
 
-void Pikachu::attack()
+Bulbasaur::Bulbasaur(int lvl,int exp)
 {
-    qDebug() << "Pikachu : \"Pika pika!\"";
+    changetype(4);
+    changeName("Bulbasaur");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Pidgeotto::Pidgeotto(int lvl,int exp)
+{
+    changetype(4);
+    changeName("Pidgeotto");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Pikachu::Pikachu(int lvl,int exp)
+{
+    changetype(4);
+    changeName("Pikachu");
+    for(int i = 0; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+QString Hitmonlee::attack()
+{
+    return "Hit!";
+}
+
+QString Charmander::attack()
+{
+    return "Fire!";
+}
+
+QString Squirtle::attack()
+{
+    return "Taste my water!";
+}
+
+QString Licktung::attack()
+{
+    return "Lick, lick!";
+}
+
+QString Muk::attack()
+{
+    return "Eat my gross muk!";
+}
+
+QString Krabby::attack()
+{
+    return "No one can live under my claw!";
+}
+
+QString Geodude::attack()
+{
+    return "Stone power!";
+}
+
+QString Shellder::attack()
+{
+    return "Shield smash!";
+}
+
+QString Onix::attack()
+{
+    return "You will die for your arrogance!";
+}
+
+QString Bulbasaur::attack()
+{
+    return "Eat my seed!";
+}
+
+QString Pidgeotto::attack()
+{
+    return "Can you defend my air attack?";
+}
+
+QString Pikachu::attack()
+{
+    return "Pika pika!";
 }
 /*
 pokemon* chooseyourpet()

@@ -2,6 +2,9 @@
 #define WELCOME_H
 
 #include <QDialog>
+#include <QPixmap>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
 
 namespace Ui {
 class welcome;
@@ -15,6 +18,8 @@ public:
     explicit welcome(QWidget *parent = nullptr);
     ~welcome();
 
+    void initScene();
+
 private slots:
     void on_loginBtn_clicked();
 
@@ -22,6 +27,8 @@ private slots:
 
 private:
     Ui::welcome *ui;
+    QGraphicsScene *scene;
+    QPixmap *pix;
 };
 
 #endif // WELCOME_H

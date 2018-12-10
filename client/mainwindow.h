@@ -6,9 +6,10 @@
 #include <QtNetwork>
 #include <QStandardItemModel>
 #include <QGraphicsScene>
-#include <QGraphicsView>
 #include <QGraphicsItem>
 #include <QKeyEvent>
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
 
 namespace Ui {
 class MainWindow;
@@ -25,23 +26,11 @@ public:
 private slots:
     void on_logoutBtn_clicked();
 
-    void on_usrBtn_clicked();
-
     void processPendingDatagram();
-
-    void updateUsr(QList<QString> &usrInfo);
-
-    void updatePoke(QList<QString> &pokeInfo);
 
     void loseLink();
 
     void on_lvlBtn_clicked();
-
-    void getUsrInfo(const QItemSelection&,const QItemSelection&);
-
-    void getPokeInfo(const QItemSelection&,const QItemSelection&);
-
-    void on_pokeBtn_clicked();
 
     void on_action_triggered();
 
@@ -49,22 +38,41 @@ private slots:
 
     void initMap();
 
+    void on_musicBtn_clicked();
+
+    void initLocalUser();
+
+    void on_btlBtn_clicked();
+
 private:
+    void bindPort();
+
     void initScene();
+
     void initSceneBackground();
+
     void keyPressEvent(QKeyEvent *e);
+
     void keyUp();
+
     void keyLeft();
+
     void keyRight();
+
     void keyDown();
+
     Ui::MainWindow *ui;
     QUdpSocket *sender;
     QUdpSocket *receiver;
     quint16 rcv1Port;
     quint16 sendPort;
     bool state = 1;
+    bool isMusic = 0;
+    bool isPlaying = 0;
     QGraphicsScene *scene;
-    QGraphicsView *view;
+    QMediaPlayer *player;
+    QMediaPlaylist *playlist;
+    QGraphicsItem *zhi;
 };
 
 #endif // MAINWINDOW_H

@@ -8,6 +8,18 @@ Newuser::Newuser(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->usrLineEdit->setFocus();
+    bindPort();
+}
+
+Newuser::~Newuser()
+{
+    delete sender;
+    delete receiver;
+    delete ui;
+}
+
+void Newuser::bindPort()
+{
     sender = new QUdpSocket(this);
     receiver = new QUdpSocket(this);
     rcv1Port = rcvPort;
@@ -16,13 +28,6 @@ Newuser::Newuser(QWidget *parent) :
     sendPort = rcv1Port + 1;
     sender->bind(sendPort,QUdpSocket::DontShareAddress);
     connect(receiver,SIGNAL(readyRead()),this,SLOT(dealDatagram()));
-}
-
-Newuser::~Newuser()
-{
-    delete sender;
-    delete receiver;
-    delete ui;
 }
 
 void Newuser::dealDatagram()
@@ -44,12 +49,13 @@ void Newuser::on_loginBtn_clicked()
     QByteArray temp;
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << login;
-    sender->writeDatagram(temp,QHostAddress::Broadcast,sendPort);
+    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
     receiver->waitForReadyRead();
     dealDatagram();
     if(flag)
     {
-        usrName = ui->usrLineEdit->text().toUtf8();
+        QString usrName = ui->usrLineEdit->text().toUtf8();
+        localUser = new localUsr(usrName);
         accept();
     }
     else
