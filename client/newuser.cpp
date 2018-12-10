@@ -44,25 +44,36 @@ void Newuser::dealDatagram()
 
 void Newuser::on_loginBtn_clicked()
 {
-    QList<QString> login;
-    login << "2" << ui->usrLineEdit->text().toUtf8() << ui->pwdLineEdit->text().toUtf8();
-    QByteArray temp;
-    QDataStream stream(&temp, QIODevice::WriteOnly);
-    stream << login;
-    sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
-    receiver->waitForReadyRead();
-    dealDatagram();
-    if(flag)
+    if(ui->usrLineEdit->text().isEmpty() || ui->pwdLineEdit->text().isEmpty())
     {
-        QString usrName = ui->usrLineEdit->text().toUtf8();
-        localUser = new localUsr(usrName);
-        accept();
-    }
-    else
-    {
-        QMessageBox::warning(this, tr("警告！"),tr("该用户名已被注册！"),QMessageBox::Yes);
+        QMessageBox::warning(this, tr("警告！"),tr("用户名或密码不能为空！"),QMessageBox::Yes);
         ui->usrLineEdit->clear();
         ui->pwdLineEdit->clear();
         ui->usrLineEdit->setFocus();
     }
+    else
+    {
+        QList<QString> login;
+        login << "2" << ui->usrLineEdit->text().toUtf8() << ui->pwdLineEdit->text().toUtf8();
+        QByteArray temp;
+        QDataStream stream(&temp, QIODevice::WriteOnly);
+        stream << login;
+        sender->writeDatagram(temp,QHostAddress::Broadcast,45454);
+        receiver->waitForReadyRead();
+        dealDatagram();
+        if(flag)
+        {
+            QString usrName = ui->usrLineEdit->text().toUtf8();
+            localUser = new localUsr(usrName);
+            accept();
+        }
+        else
+        {
+            QMessageBox::warning(this, tr("警告！"),tr("该用户名已被注册！"),QMessageBox::Yes);
+            ui->usrLineEdit->clear();
+            ui->pwdLineEdit->clear();
+            ui->usrLineEdit->setFocus();
+        }
+    }
+
 }

@@ -19,24 +19,17 @@ preBtl::preBtl(QWidget *parent) :
 
 preBtl::~preBtl()
 {
-    qint32 i = 0;
-    qint32 j = 0;
-    for(i = 0; i < rowNum1; i++)
-        for(j = 0; j < 26; j++)
-        {
-            myPokeModel->clear();
-        }
+    myPokeModel->clear();
     delete myPokeModel;
-    for(i = 0; i < rowNum2; i++)
-        for(j = 0; j < 26; j++)
-        {
-            enmPokeModel->clear();
-        }
+    enmPokeModel->clear();
     delete enmPokeModel;
-    delete enmChose;
     delete ui;
     delete sender;
     delete receiver;
+    if(ui->autoButton->isChecked())
+        localUser->autoBattle(1);
+    else
+        localUser->autoBattle(0);
 }
 
 void preBtl::bindPort()
@@ -175,13 +168,18 @@ void preBtl::processPendingDatagram()
 void preBtl::on_buttonBox_accepted()
 {
     if(!myChosen)
-        QMessageBox::warning(this, tr("警告！"),tr("请选择您的精灵"),QMessageBox::Yes);
+            QMessageBox::warning(this, tr("警告！"),tr("请选择您的精灵"),QMessageBox::Yes);
     else if(!enmChosen)
-        QMessageBox::warning(this, tr("警告！"),tr("请选择要对战的精灵"),QMessageBox::Yes);
+            QMessageBox::warning(this, tr("警告！"),tr("请选择要对战的精灵"),QMessageBox::Yes);
     else
     {
         localUser->choseToBattle(which);
         localUser->createEnm(*enmChose);
         accept();
     }
+}
+
+void preBtl::on_buttonBox_rejected()
+{
+    reject();
 }

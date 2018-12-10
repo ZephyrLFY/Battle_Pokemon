@@ -23,14 +23,6 @@ public:
 
     pokemon* getEnm();
 
-    QString getNumBadge();
-
-    QString getHighBadge();
-
-    qint32 getNumColor();
-
-    qint32 getHighColor();
-
     void whichBattle(bool flag);
 
     void autoBattle(bool flag);
@@ -44,11 +36,7 @@ public:
     void createEnm(QList<QString> &enm);
 
 private:
-    QString numBadge;
-    QString highBadge;
     QString usrName;
-    qint32 numBadgeColor;
-    qint32 highBadgeColor;
     pokemon* poke[7];
     bool whichBtl;
     bool autoBtl;

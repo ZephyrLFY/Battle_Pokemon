@@ -19,24 +19,24 @@ void localUsr::initUsr(QList<QString> &poke)
 {
     qint32 num = poke.at(0).toInt();
     poke.removeFirst();
-    QString pokeName;
-    qint32 lvl = 0;;
-    qint32 exp = 0;
-    qint32 count = 0;
-    for(int i = 0; i < num; i++)
+    if(poke.at(0) != "over")
     {
-        pokeName = poke.at(0);
-        poke.removeFirst();
-        lvl = poke.at(0).toInt();
-        poke.removeFirst();
-        exp = poke.at(0).toInt();
-        poke.removeFirst();
-        poke.removeFirst();
-        addPoke(pokeName,lvl,exp,i);
-        if(lvl == 15)
-            count++;
+        QString pokeName;
+        qint32 lvl = 0;;
+        qint32 exp = 0;
+        for(int i = 0; i < num; i++)
+        {
+            pokeName = poke.at(0);
+            poke.removeFirst();
+            lvl = poke.at(0).toInt();
+            poke.removeFirst();
+            exp = poke.at(0).toInt();
+            poke.removeFirst();
+            poke.removeFirst();
+            addPoke(pokeName,lvl,exp,i);
+        }
     }
-    dealBadge(num,count);
+
 }
 
 void localUsr::addPoke(QString name,qint32 level,qint32 exp,qint32 index)
@@ -119,72 +119,9 @@ void localUsr::createEnm(QList<QString> &enm)
         enmPoke = new Pikachu(pokeLvl,pokeExp);
 }
 
-void localUsr::dealBadge(qint32 num,qint32 high)
-{
-    QString nums;
-    switch(num)
-    {
-    case 0:
-        nums = "None";
-        break;
-    case 7:
-        nums = "Gold";
-        numBadgeColor = 3;
-        break;
-    case 5:
-    case 6:
-        nums = "Silver";
-        numBadgeColor = 2;
-        break;
-    default:
-        nums = "Copper";
-        numBadgeColor = 1;
-    }
-    this->numBadge = nums;
-    switch(high)
-    {
-    case 0:
-        nums = "None";
-        break;
-    case 7:
-        nums = "Gold";
-        highBadgeColor = 3;
-        break;
-    case 5:
-    case 6:
-        nums = "Silver";
-        highBadgeColor = 2;
-        break;
-    default:
-        nums = "Copper";
-        highBadgeColor = 1;
-    }
-    this->highBadge = nums;
-}
-
-QString localUsr::getNumBadge()
-{
-    return this->numBadge;
-}
-
-QString localUsr::getHighBadge()
-{
-    return this->highBadge;
-}
-
 QString localUsr::getName()
 {
     return usrName;
-}
-
-qint32 localUsr::getNumColor()
-{
-    return numBadgeColor;
-}
-
-qint32 localUsr::getHighColor()
-{
-    return highBadgeColor;
 }
 
 void localUsr::whichBattle(bool flag)

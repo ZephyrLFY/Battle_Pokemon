@@ -32,7 +32,13 @@ signals:
 
     void EnmLabel(QString content);
 
+    void MyOutput(QString content);
+
+    void EnmOutput(QString content);
+
 private:
+    int generateRandomInteger(int min,int max);
+
     pokemon *a,*b;
 };
 

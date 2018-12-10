@@ -1,5 +1,4 @@
 #include"petcreating.h"
-#define random(a,b) (rand()%(b-a+1)+a)
 using namespace std;
 
 pokemon::pokemon()
@@ -16,6 +15,11 @@ pokemon::pokemon()
 QString pokemon::getName()
 {
     return this->name;
+}
+
+int pokemon::getType()
+{
+    return type;
 }
 
 void pokemon::changetype(int type)
@@ -69,17 +73,33 @@ int pokemon::damagecost()
     return atk;
 }
 
-QString pokemon::damagedeal(int damage,qint32 ran)
+int pokemon::generateRandomInteger(int min, int max)
+{
+    Q_ASSERT(min < max);
+    // 加入随机种子。种子是当前时间距离0点0分0秒的秒数。
+    // 每次启动程序，只添加一次种子，以做到数字真正随机。
+    static bool seedStatus;
+    if (!seedStatus)
+    {
+        qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+        seedStatus = true;
+    }
+    int nRandom = qrand() % (max - min);
+    nRandom = min + nRandom;
+
+    return nRandom;
+}
+
+QString pokemon::damagedeal(int damage)
 {
     QString action;
     QString mation;
     damage = damage - def;
     if(damage < 0)
         damage = 0;
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()) + ran);
-    int dodge = qrand() % 100;
+    int dodge = generateRandomInteger(1,100);
     bool isDodge = 0;
-    if(dodge <= 10)
+    if(dodge > 80)
     {
         if(type == 4)
         {
@@ -89,7 +109,7 @@ QString pokemon::damagedeal(int damage,qint32 ran)
         }
         else
         {
-            if(damage <= 5)
+            if(damage > 90)
             {
                 damage = 0;
                 action = "闪避了! ";
@@ -100,8 +120,7 @@ QString pokemon::damagedeal(int damage,qint32 ran)
     }
     if(!isDodge)
     {
-        qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()) + ran + ran);
-        int crush = qrand() % 100;
+        int crush = generateRandomInteger(1,100);
         if(crush > 90)
         {
             damage = damage * 2;
@@ -126,6 +145,13 @@ int pokemon::gain()
     return 10*level;
 }
 
+void pokemon::gainHp(int suck)
+{
+    hp += suck;
+    if(hp > fullhp)
+        hp = fullhp;
+}
+
 void pokemon::expup(int bonus)
 {
     exp += bonus;
@@ -133,10 +159,14 @@ void pokemon::expup(int bonus)
 
 bool pokemon::upornot()
 {
-    if(exp >= 5*level)
-        return 1;
-    else
-        return 0;
+    if(this->level != 15)
+    {
+        if(exp >= 5*level)
+            return 1;
+        else
+            return 0;
+    }
+    return 0;
 }
 
 void pokemon::lvlup()//升级函数，根据精灵类型会有不同
@@ -188,6 +218,65 @@ int pokemon::getHp()
 int pokemon::getFullHp()
 {
     return fullhp;
+}
+
+int pokemon::getLvl()
+{
+    return level;
+}
+
+int pokemon::getTimer()
+{
+    if(timer > 0)
+    {
+        timer--;
+        return timer + 1;
+    }
+    else
+    {
+        setState(0);
+        return 0;
+    }
+}
+
+void pokemon::setTimer(int setting)
+{
+    timer = setting;
+}
+
+int pokemon::getState()
+{
+    return state;
+}
+
+void pokemon::setState(int which)
+{
+    state = which;
+}
+
+QString str_pkm::skill()
+{
+    setTimer(3);
+    setState(3);
+    return "英勇打击！";
+}
+
+QString fat_pkm::skill()
+{
+    gainHp(damagecost() * 2);
+    return "生命汲取！";
+}
+
+QString def_pkm::skill()
+{
+    setState(2);
+    setTimer(3);
+    return "石化表皮!";
+}
+
+QString agi_pkm::skill()
+{
+    return "眩晕！";
 }
 
 Hitmonlee::Hitmonlee(int lvl,int exp)

@@ -246,8 +246,13 @@ void MainWindow::on_musicBtn_clicked()
     {
         if(isPlaying)
         {
-            player->pause();
-            isPlaying = 0;
+//            player->pause();
+//            isPlaying = 0;
+            int currentIndex = playlist->currentIndex();
+            if(++currentIndex==playlist->mediaCount())
+                currentIndex=0;
+            playlist->setCurrentIndex(currentIndex);
+            player->play();
         }
         else
         {
@@ -307,14 +312,11 @@ void MainWindow::processPendingDatagram()
 
 void MainWindow::on_btlBtn_clicked()
 {
-    if(!isMusic)
-        return;
-    else
+    localUser->whichBattle(0);
+    preBtl lvlup;
+    if(lvlup.exec() == QDialog::Accepted)
     {
-        int currentIndex = playlist->currentIndex();
-        if(++currentIndex==playlist->mediaCount())
-            currentIndex=0;
-        playlist->setCurrentIndex(currentIndex);
-        player->play();
+        Battleground *btl = new Battleground;
+        btl->exec();
     }
 }

@@ -15,13 +15,51 @@ void BattleThread::run()
     emit done();
 }
 
-void BattleThread::beat(pokemon &a,pokemon&b,qint32 ran)//攻击函数，攻击者和被攻击者
+void BattleThread::beat(pokemon &a,pokemon&b,int ran)//攻击函数，攻击者和被攻击者
 {
-    QString temp = b.damagedeal(a.damagecost(),ran);
-    if(ran == 0)
-        emit EnmLabel(temp);
+    QString temp1,temp2;
+    int rans = generateRandomInteger(1,100);
+    a.getTimer();
+    b.getTimer();
+    if(a.getState() == 1)
+            temp2 = "对方被眩晕了！无法攻击";
     else
-        emit MyLabel(temp);
+    {
+        if(rans > 85)
+        {
+            temp1 = a.skill();
+            if(a.getType() == 4)
+            {
+                b.setState(1);
+                b.setTimer(2);
+            }
+        }
+        else
+            temp1 = a.attack();
+
+        if(a.getState() == 3)
+        {
+            if(b.getState() == 2)
+                temp2 = b.damagedeal(a.damagecost());
+            else
+                temp2 = b.damagedeal(a.damagecost() + a.getLvl()*3);
+        }
+        else if(b.getState() == 2)
+            temp2 = b.damagedeal(a.damagecost() - b.getLvl()*3);
+        else
+            temp2 = b.damagedeal(a.damagecost());
+    }
+
+    if(ran == 0)
+    {
+        emit EnmLabel(temp2);
+        emit MyOutput(temp1);
+    }
+    else
+    {
+        emit MyLabel(temp2);
+        emit EnmOutput(temp1);
+    }
 }
 
 void BattleThread::result(pokemon &a,pokemon &b)
@@ -57,13 +95,30 @@ void BattleThread::battle(pokemon &a,pokemon &b)/*根据时间以及攻击间隔
         }
         if(clock()-b_start >= b_delay)
         {
-            beat(b,a,1234);
+            beat(b,a,123456);
             b_start = clock();
         }
     }
     result(a,b);
     a.hpfull();
     b.hpfull();
+}
+
+int BattleThread::generateRandomInteger(int min,int max)
+{
+    Q_ASSERT(min < max);
+    // 加入随机种子。种子是当前时间距离0点0分0秒的秒数。
+    // 每次启动程序，只添加一次种子，以做到数字真正随机。
+    static bool seedStatus;
+    if (!seedStatus)
+    {
+        qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+        seedStatus = true;
+    }
+    int nRandom = qrand() % (max - min);
+    nRandom = min + nRandom;
+
+    return nRandom;
 }
 
 Battleground::Battleground(QWidget *parent) :
@@ -85,8 +140,6 @@ Battleground::~Battleground()
 {
     delete ui;
     delete scene;
-    delete my;
-    delete enm;
 }
 
 void Battleground::connects()
@@ -96,6 +149,8 @@ void Battleground::connects()
     connect(thread,SIGNAL(done()), this, SLOT(over()));
     connect(thread, SIGNAL(MyLabel(QString)),ui->myInfo, SLOT(setText(QString)));
     connect(thread, SIGNAL(EnmLabel(QString)),ui->enmInfo, SLOT(setText(QString)));
+    connect(thread, SIGNAL(MyOutput(QString)),ui->myOut, SLOT(setText(QString)));
+    connect(thread, SIGNAL(EnmOutput(QString)),ui->enmOut, SLOT(setText(QString)));
 }
 
 void Battleground::update()
@@ -113,6 +168,14 @@ void Battleground::over()
 void Battleground::initScene()
 {
     scene->setSceneRect(25 , 20 , 600, 400);
+    ui->myOut->viewport()->setAutoFillBackground(false);
+    ui->myOut->setFrameStyle(QFrame::NoFrame);
+    ui->enmOut->viewport()->setAutoFillBackground(false);
+    ui->enmOut->setFrameStyle(QFrame::NoFrame);
+    ui->myInfo->viewport()->setAutoFillBackground(false);
+    ui->myInfo->setFrameStyle(QFrame::NoFrame);
+    ui->enmInfo->viewport()->setAutoFillBackground(false);
+    ui->enmInfo->setFrameStyle(QFrame::NoFrame);
 }
 
 void Battleground::initMap()

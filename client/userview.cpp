@@ -46,7 +46,6 @@ void userView::getUsr()
 
 void userView::updateTable(QList<QString> &usrInfo)
 {
-    qint32 i = 0;
     rowNum = usrInfo.count("line");
     bool color = false;
     bool isMe = false;
@@ -80,78 +79,110 @@ void userView::updateTable(QList<QString> &usrInfo)
     usrModel->setHeaderData(24,Qt::Horizontal,"小精灵7");
     usrModel->setHeaderData(25,Qt::Horizontal,"等级7");
     usrModel->setHeaderData(26,Qt::Horizontal,"经验7");
-    for(qint32 row = 0; row < rowNum; row++)
+    int numSum = 0;
+    int highSum = 0;
+    for(int row = 0; row < rowNum; row++)
     {
-        qint32 alive = i + 1;
-        if(usrInfo.at(alive) == "1")
+        if(usrInfo.at(1) == "1")
             color = true;
-        if(usrInfo.at(i) == localUser->getName())
+        if(usrInfo.at(0) == localUser->getName())
         {
             isMe = true;
             color = false;
         }
-        for(qint32 col = 0; col < 26; col++)
+        for(int col = 0; col < 26; col++)
         {
-            if(usrInfo.at(i) == "line")
+            if(usrInfo.at(0) == "line")
             {
-                i++;
+                switch(numSum)
+                {
+                case 6:
+                case 7:
+                {
+                    QStandardItem *item1 = new QStandardItem("Gold");
+                    item1->setBackground(QBrush(QColor(255,215,0)));
+                    usrModel->setItem(row,3,item1);
+                    break;
+                }
+                case 0:
+                {
+                    QStandardItem *item1 = new QStandardItem("None");
+                    usrModel->setItem(row,3,item1);
+                    break;
+                }
+                case 1:
+                case 2:
+                {
+                    QStandardItem *item1 = new QStandardItem("Copper");
+                    item1->setBackground(QBrush(QColor(196,112,34)));
+                    usrModel->setItem(row,3,item1);
+                    break;
+                }
+                default:
+                {
+                    QStandardItem *item1 = new QStandardItem("Silver");
+                    item1->setBackground(QBrush(QColor(192,192,192)));
+                    usrModel->setItem(row,3,item1);
+                    break;
+                }
+                }
+                switch(highSum)
+                {
+                case 6:
+                case 7:
+                {
+                    QStandardItem *item2 = new QStandardItem("Gold");
+                    item2->setBackground(QBrush(QColor(255,215,0)));
+                    usrModel->setItem(row,4,item2);
+                    break;
+                }
+                case 0:
+                {
+                    QStandardItem *item2 = new QStandardItem("None");
+                    usrModel->setItem(row,4,item2);
+                    break;
+                }
+                case 1:
+                case 2:
+                {
+                    QStandardItem *item2 = new QStandardItem("Copper");
+                    item2->setBackground(QBrush(QColor(196,112,34)));
+                    usrModel->setItem(row,4,item2);
+                    break;
+                }
+                default:
+                {
+                    QStandardItem *item2 = new QStandardItem("Silver");
+                    item2->setBackground(QBrush(QColor(192,192,192)));
+                    usrModel->setItem(row,4,item2);
+                    break;
+                }
+                }
+                usrInfo.removeFirst();
+                numSum = 0;
+                highSum = 0;
                 break;
             }
-            else if(col == 3)
+            if(col == 3 || col == 4)
+                continue;
+            else if(col == 5)
+                numSum = usrInfo.at(0).toInt();
+            else if(col > 6 && ((col % 3) == 1))
             {
-                QString badge = localUser->getNumBadge();
-                QStandardItem *item = new QStandardItem(badge);
-                switch(localUser->getNumColor())
-                {
-                case 3:
-                    item->setBackground(QBrush(QColor(255,215,0)));
-                    break;
-                case 2:
-                    item->setBackground(QBrush(QColor(192,192,192)));
-                    break;
-                case 1:
-                    item->setBackground(QBrush(QColor(196,112,34)));
-                    break;
-                default:
-                    break;
-                }
-                usrModel->setItem(row,col,item);
+                if(usrInfo.at(0).toInt() == 15)
+                    highSum++;
             }
-            else if(col == 4)
+            QStandardItem *item = new QStandardItem(usrInfo.at(0));
+            if(col == 0)
             {
-                QString badge = localUser->getHighBadge();
-                QStandardItem *item = new QStandardItem(badge);
-                switch(localUser->getHighColor())
-                {
-                case 3:
-                    item->setBackground(QBrush(QColor(255,215,0)));
-                    break;
-                case 2:
-                    item->setBackground(QBrush(QColor(192,192,192)));
-                    break;
-                case 1:
-                    item->setBackground(QBrush(QColor(196,112,34)));
-                    break;
-                default:
-                    break;
-                }
-                usrModel->setItem(row,col,item);
+                if(color)
+                    item->setBackground(QBrush(QColor(153,0,153)));
+                else if(isMe)
+                    item->setBackground(QBrush(QColor(162,205,90)));
+                usrInfo.removeFirst();
             }
-            else
-            {
-                if(alive == i)//在线情况
-                    i++;
-                QStandardItem *item = new QStandardItem(usrInfo.at(i));
-                if(i == alive - 1)
-                {
-                    if(color)
-                        item->setBackground(QBrush(QColor(153,0,153)));
-                    else if(isMe)
-                        item->setBackground(QBrush(QColor(162,205,90)));
-                }
-                usrModel->setItem(row,col,item);
-                i++;
-            }
+            usrModel->setItem(row,col,item);
+            usrInfo.removeFirst();
         }
         color = false;
         isMe = false;

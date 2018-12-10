@@ -10,23 +10,32 @@ class pokemon : public QObject
 {
     Q_OBJECT
 public:
-    pokemon();//构造函数，初始化一个默认小精灵
+    pokemon();//构造函数，初始化一个默认小精灵,但是无法实例化成对象
     bool alive();//存活情况
     virtual QString attack() = 0;//攻击函数，根据类型有不同
+    virtual QString skill() = 0;//use the power
     double atkf();//攻击频率
     int damagecost();//造成伤害
-    QString damagedeal(int damage,qint32 ran);//计算伤害，修改血量
+    QString damagedeal(int damage);//计算伤害，修改血量
     void changetype(int type);//实例化精灵时根据类型而调节属性
     void changeName(QString name);
     void expup(qint32 bonus);//获得经验值
     int gain();//对方会获得多少经验值
+    void gainHp(int suck);//肉盾型回血专用
     bool upornot();//经验是否满足升级
     void lvlup();//升级
     void hpfull();//回满血
     QString getName();
+    int getType();
+    int getLvl();
     void Test();//测试函数
     int getHp();
     int getFullHp();
+    int getTimer();
+    void setTimer(int setting);
+    int getState();
+    void setState(int which);
+    int generateRandomInteger(int min,int max);
 signals:
     void fresh();
 private:
@@ -38,20 +47,34 @@ private:
     int hp;//血量
     int fullhp;//满血量
     double interval;//攻击间隔
+    int state = 0;
+    int timer = 3;
     QString name;
 };
 
 class str_pkm : public pokemon//力量型
-{};
+{
+public:
+    QString skill();
+};
 
 class fat_pkm : public pokemon//肉盾型
-{};
+{
+public:
+    QString skill();
+};
 
 class def_pkm : public pokemon//防御型
-{};
+{
+public:
+    QString skill();
+};
 
 class agi_pkm : public pokemon//敏捷型
-{};
+{
+public:
+    QString skill();
+};
 
 class Hitmonlee : public str_pkm//沙瓦朗
 {
@@ -151,10 +174,5 @@ public:
 
 pokemon* chooseyourpet();
 
-void beat(pokemon &a,pokemon&b,int ran);
-
-void result(pokemon &a,pokemon &b);
-
-void battle(pokemon &a,pokemon &b);
 
 #endif // PETCREATING_H

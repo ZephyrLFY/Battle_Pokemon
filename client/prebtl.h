@@ -36,7 +36,11 @@ public slots:
     void getEnmPoke(const QItemSelection&,const QItemSelection&);
 
 private slots:
+
+
     void on_buttonBox_accepted();
+
+    void on_buttonBox_rejected();
 
 private:
     Ui::preBtl *ui;
