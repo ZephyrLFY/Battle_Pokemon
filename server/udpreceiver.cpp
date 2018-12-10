@@ -7,12 +7,8 @@ udpReceiver::udpReceiver(QWidget *parent) :
     ui(new Ui::udpReceiver)
 {
     ui->setupUi(this);
-    receiver = new QUdpSocket(this);
-    sender = new QUdpSocket(this);
-    receiver->bind(rcvPort,QUdpSocket::DontShareAddress);
-    sender->bind(sendPort,QUdpSocket::DontShareAddress);
     loger = new Log;
-    connect(receiver,SIGNAL(readyRead()),this,SLOT(dealDatagram()));
+    bindPort();
 }
 
 udpReceiver::~udpReceiver()
@@ -20,6 +16,15 @@ udpReceiver::~udpReceiver()
     delete ui;
     delete receiver;
     delete sender;
+}
+
+void udpReceiver::bindPort()
+{
+    receiver = new QUdpSocket(this);
+    sender = new QUdpSocket(this);
+    receiver->bind(rcvPort,QUdpSocket::DontShareAddress);
+    sender->bind(sendPort,QUdpSocket::DontShareAddress);
+    connect(receiver,SIGNAL(readyRead()),this,SLOT(dealDatagram()));
 }
 
 void udpReceiver::on_sendBtn_clicked()
@@ -95,7 +100,7 @@ void udpReceiver::linkOver(QString name,QHostAddress address,quint16 hisPort)
     sender->writeDatagram("1",address,hisPort);
 }
 
-void udpReceiver::userInfo(QString name,QHostAddress address,quint16 hisPort)
+void udpReceiver::userInfo(QHostAddress address,quint16 hisPort)
 {
     QByteArray temp;
     QList<QString> usrInfo = loger->getUsr();
@@ -110,6 +115,15 @@ void udpReceiver::pokeInfo(QHostAddress address,quint16 hisPort)
     QList<QString> pokeInfo = loger->getPoke();
     QDataStream stream(&temp, QIODevice::WriteOnly);
     stream << pokeInfo;
+    sender->writeDatagram(temp,address,hisPort);
+}
+
+void udpReceiver::usrPoke(QString name,QHostAddress address,quint16 hisPort)
+{
+    QByteArray temp;
+    QList<QString> usrPoke = loger->getUsrPoke(name);
+    QDataStream stream(&temp, QIODevice::WriteOnly);
+    stream << usrPoke;
     sender->writeDatagram(temp,address,hisPort);
 }
 
@@ -128,6 +142,7 @@ void udpReceiver::dealDatagram()
         QList<QString> toDo;
         QDataStream stream(&datagram, QIODevice::ReadWrite);
         stream >> toDo;
+        qDebug() << toDo << endl;
         qint32 which = toDo.at(0).toInt();
         switch(which)
         {
@@ -149,12 +164,17 @@ void udpReceiver::dealDatagram()
         }
         case 5:
         {
-            userInfo(toDo.at(1),*sendIp,sendBack);
+            userInfo(*sendIp,sendBack);
             break;
         }
         case 6:
         {
             pokeInfo(*sendIp,sendBack);
+            break;
+        }
+        case 7:
+        {
+            usrPoke(toDo.at(1),*sendIp,sendBack);
             break;
         }
         }
