@@ -2,61 +2,6 @@
 #define random(a,b) (rand()%(b-a+1)+a)
 using namespace std;
 
-//void beat(pokemon &a,pokemon&b,qint32 ran)//攻击函数，攻击者和被攻击者
-//{
-//    QString temp = b.damagedeal(a.damagecost(),ran);
-////    if(ran == 0)
-////        ui->enmInfo->setText(temp);
-////    else
-////        ui->myInfo->setText(temp);
-//}
-
-//void result(pokemon &a,pokemon &b)
-//{
-//    if((!a.alive())&&(!b.alive()))
-//        qDebug() << "Both of them are dead." << endl;
-//    else if(a.alive())
-//    {
-//        qDebug() << "Congratulations! Your pet wins!" << endl;
-//        a.expup(b.gain());
-//        qDebug() << "You gain " << b.gain() << " exp." << endl;
-//        if(a.upornot())
-//            a.lvlup();
-//    }
-//    else
-//        qDebug() << "Sorry, your pet is dead." << endl;
-//}
-
-//void battle(pokemon &a,pokemon &b)/*根据时间以及攻击间隔，互相攻击*/
-//{
-//    clock_t a_delay = a.atkf() * CLOCKS_PER_SEC;
-//    clock_t b_delay = b.atkf() * CLOCKS_PER_SEC;
-//    clock_t a_start = clock();
-//    clock_t b_start = clock();
-//    while(a.alive()&&b.alive())
-//    {
-//        while((clock()-a_start < a_delay)&&(clock()-b_start < b_delay))
-//        {
-////            ui->myInfo->setText("1");
-////            ui->enmInfo->setText("2");
-//            ;
-//        }
-//        if(clock() - a_start >= a_delay)
-//        {
-//            beat(a,b,0);
-//            a_start = clock();
-//        }
-//        if(clock()-b_start >= b_delay)
-//        {
-//            beat(b,a,1234);
-//            b_start = clock();
-//        }
-//    }
-//    result(a,b);
-//    a.hpfull();
-//    b.hpfull();
-//}
-
 pokemon::pokemon()
 {
     this->level = 1;
