@@ -7,7 +7,8 @@ Log::Log()
         QMessageBox::critical(nullptr, qApp->tr("无法打开数据库"),qApp->tr("未能与数据库建立连接。"), QMessageBox::Cancel);
     usrQuery = new QSqlQuery(db);
     pokeQuery = new QSqlQuery(db);
-    initDatabase();
+    //initDatabase();
+    setOnlineOff();
 }
 
 Log::~Log()
@@ -53,11 +54,44 @@ void Log::initDatabase()
     pokeQuery->exec("insert into pokemon (ID,name,level)"
                     "values('1','Pikachu',1)");
     pokeQuery->exec("insert into pokemon (ID,name,level)"
-                    "values('2','Squirtle',7)");
+                    "values('2','Squirtle',1)");
     pokeQuery->exec("insert into pokemon (ID,name,level)"
-                    "values('3','Charmander',15)");
+                    "values('3','Charmander',2)");
     pokeQuery->exec("insert into pokemon (ID,name,level)"
-                    "values('4','Hitmonlee',15)");
+                    "values('4','Hitmonlee',3)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                    "values('5','Pidgeotto',5)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                    "values('6','Shellder',5)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                    "values('7','Bulbasaur',7)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                    "values('8','Licktung',8)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                        "values('9','Onix',9)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                        "values('10','Pidgeotto',10)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                        "values('11','Muk',11)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                        "values('12','Krabby',13)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                        "values('13','Pidgeotto',13)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                        "values('14','Bulbasaur',15)");
+    pokeQuery->exec("insert into pokemon (ID,name,level)"
+                        "values('15','Pikachu',15)");
+}
+
+void Log::setOnlineOff()
+{
+    usrQuery->exec("select alive from player");
+    while(usrQuery->next())
+    {
+        usrQuery->prepare("update player set alive = ?");
+        usrQuery->addBindValue(0);
+        usrQuery->exec();
+    }
 }
 
 QString Log::searchPwd(QString name)
@@ -89,6 +123,7 @@ void Log::linkStart(QString name)
 
 bool Log::addNewusr(QString name,QString pwd)
 {
+    qDebug() << 2 << endl;
     usrQuery->exec(QString("select password from player where (ID = '%1')").arg(name));
     if(usrQuery->next())
         return false;
@@ -107,9 +142,11 @@ bool Log::addNewusr(QString name,QString pwd)
 
 void Log::addPokemon(QString name)
 {
-    usrQuery->prepare("update player set pokemon1=?,level1=? where ID = ?");
+    qDebug() << 3 << endl;
+    usrQuery->prepare("update player set pokemon1=?,level1=?,exp1=? where ID = ?");
     usrQuery->addBindValue("Charmander");
     usrQuery->addBindValue(1);
+    usrQuery->addBindValue(0);
     usrQuery->addBindValue(name);
     usrQuery->exec();
     usrQuery->prepare("selcet number from player where ID = ?");

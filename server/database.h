@@ -15,6 +15,7 @@ public:
     explicit Log();
     virtual ~Log();
     void initDatabase();
+    void setOnlineOff();
     QString searchPwd(QString name);
     bool addNewusr(QString name,QString pwd);
     void addPokemon(QString name);
@@ -22,6 +23,7 @@ public:
     void linkStart(QString name);
     QList<QString>& getUsr();
     QList<QString>& getPoke();
+    QList<QString>& getUsrPoke(QString name);
 public slots:
     void createConnection();
     bool freeConnection(QString name);

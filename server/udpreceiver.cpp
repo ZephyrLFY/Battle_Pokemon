@@ -142,7 +142,6 @@ void udpReceiver::dealDatagram()
         QList<QString> toDo;
         QDataStream stream(&datagram, QIODevice::ReadWrite);
         stream >> toDo;
-        qDebug() << toDo << endl;
         qint32 which = toDo.at(0).toInt();
         switch(which)
         {
