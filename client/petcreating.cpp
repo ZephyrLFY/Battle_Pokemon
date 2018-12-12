@@ -1,52 +1,5 @@
 #include"petcreating.h"
-#define random(a,b) (rand()%(b-a+1)+a)
 using namespace std;
-
-void beat(pokemon &a,pokemon&b,int ran)//攻击函数，攻击者和被攻击者
-{
-    a.attack();
-    b.damagedeal(a.damagecost(),ran);
-}
-
-void result(pokemon &a,pokemon &b)
-{
-    if((!a.alive())&&(!b.alive()))
-        cout << "Both of them are dead." << endl;
-    else if(a.alive())
-    {
-        cout << "Congratulations! Your pet wins!" << endl;
-        a.expup(b.gain());
-        cout << "You gain " << b.gain() << " exp." << endl;
-        if(a.upornot())
-            a.lvlup();
-    }
-    else
-        cout << "Sorry, your pet is dead." << endl;
-}
-
-void battle(pokemon &a,pokemon &b)/*根据时间以及攻击间隔，互相攻击*/
-{
-    clock_t a_delay = a.atkf() * CLOCKS_PER_SEC;
-    clock_t b_delay = b.atkf() * CLOCKS_PER_SEC;
-    clock_t a_start = clock();
-    clock_t b_start = clock();
-    while(a.alive()&&b.alive())
-    {
-        while((clock()-a_start < a_delay)&&(clock()-b_start < b_delay))
-            ;
-        if(clock()-a_start >= a_delay)
-        {
-            beat(a,b,0);
-            a_start = clock();
-        }
-        if(clock()-b_start >= b_delay)
-        {
-            beat(b,a,1234);
-            b_start = clock();
-        }
-    }
-    //result(a,b);
-}
 
 pokemon::pokemon()
 {
@@ -59,8 +12,19 @@ pokemon::pokemon()
     this->interval = 1;
 }
 
-void pokemon::changetype()
+QString pokemon::getName()
 {
+    return this->name;
+}
+
+int pokemon::getType()
+{
+    return type;
+}
+
+void pokemon::changetype(int type)
+{
+    this->type = type;
     if(type == 1)//力量型
     {
         atk += 4;
@@ -86,6 +50,11 @@ void pokemon::changetype()
     }
 }
 
+void pokemon::changeName(QString name)
+{
+    this->name = name;
+}
+
 bool pokemon::alive()
 {
     if(hp > 0)
@@ -99,35 +68,49 @@ double pokemon::atkf()
     return interval;
 }
 
-double pokemon::damagecost()
+int pokemon::damagecost()
 {
     return atk;
 }
 
-void pokemon::damagedeal(double damage,uint ran)
+int pokemon::generateRandomInteger(int min, int max)
 {
+    Q_ASSERT(min < max);
+    static bool seedStatus;
+    if (!seedStatus)
+    {
+        qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+        seedStatus = true;
+    }
+    int nRandom = qrand() % (max - min);
+    nRandom = min + nRandom;
+
+    return nRandom;
+}
+
+QString pokemon::damagedeal(int damage)
+{
+    QString action;
+    QString mation;
     damage = damage - def;
     if(damage < 0)
         damage = 0;
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()) + ran);
-    //srand((unsigned)time(NULL) + ran);//随机种子
-    int dodge = qrand() % 100;
-    //long dodge = random(1,100);//闪避
+    int dodge = generateRandomInteger(1,100);
     bool isDodge = 0;
-    if(dodge <= 10)
+    if(dodge > 80)
     {
         if(type == 4)
         {
             damage = 0;
-            cout << "被闪避了! ";
+            action = "闪避了! ";
             isDodge = 1;
         }
         else
         {
-            if(damage <= 5)
+            if(damage > 90)
             {
                 damage = 0;
-                cout << "被闪避了! ";
+                action = "闪避了! ";
                 isDodge = 1;
             }
             else;
@@ -135,20 +118,19 @@ void pokemon::damagedeal(double damage,uint ran)
     }
     if(!isDodge)
     {
-        //srand((unsigned)time(NULL) + ran + ran);
-        qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()) + ran + ran);
-        //long crush = random(1,100);//暴击
-        int crush = qrand() % 100;
+        int crush = generateRandomInteger(1,100);
         if(crush > 90)
         {
-            damage = damage * 1.5;
-            cout << "造成了暴击! ";
+            damage = damage * 2;
+            action = "暴击! ";
         }
     }
     hp = hp - damage;
-    cout << "造成了" << damage << "点伤害。" << endl;
+    QString howMany = QString::number(damage);
     if(hp < 0)
         hp = 0;
+    emit fresh();
+    return action + " " + mation + ("受到了" + howMany + "点伤害。");
 }
 
 void pokemon::hpfull()
@@ -161,6 +143,13 @@ int pokemon::gain()
     return 10*level;
 }
 
+void pokemon::gainHp(int suck)
+{
+    hp += suck;
+    if(hp > fullhp)
+        hp = fullhp;
+}
+
 void pokemon::expup(int bonus)
 {
     exp += bonus;
@@ -168,114 +157,304 @@ void pokemon::expup(int bonus)
 
 bool pokemon::upornot()
 {
-    if(exp >= 5*level)
-        return 1;
-    else
-        return 0;
+    if(this->level != 15)
+    {
+        if(exp >= 5*level)
+            return 1;
+        else
+            return 0;
+    }
+    return 0;
 }
 
 void pokemon::lvlup()//升级函数，根据精灵类型会有不同
 {
-    cout << "Level up!" << endl;
-    level++;
-    exp = 0;
-    hpfull();
-    if(type == 1)
-    {
-        atk += 12;
-        def += 5;
-        hp += 62;
-        fullhp += 62;
-    }
-    else if(type == 2)
-    {
-        atk += 7;
-        def += 6;
-        hp += 108;
-        fullhp += 108;
-    }
-    else if(type == 3)
-    {
-        atk += 7;
-        def += 7;
-        hp += 60;
-        fullhp += 60;
-    }
+    if(level == 15)
+        hpfull();
     else
     {
-        atk += 8;
-        def += 5;
-        hp += 50;
-        fullhp += 50;
-        interval = interval - 0.03;
+        level++;
+        exp = 0;
+        hpfull();
+        if(type == 1)
+        {
+            atk += 12;
+            def += 5;
+            hp += 62;
+            fullhp += 62;
+        }
+        else if(type == 2)
+        {
+            atk += 7;
+            def += 6;
+            hp += 108;
+            fullhp += 108;
+        }
+        else if(type == 3)
+        {
+            atk += 7;
+            def += 7;
+            hp += 60;
+            fullhp += 60;
+        }
+        else
+        {
+            atk += 8;
+            def += 5;
+            hp += 50;
+            fullhp += 50;
+            interval = interval - 0.03;
+        }
     }
 }
 
 void pokemon::Test()
 {
-    cout << hp << " " << atk << " " << def << " " << interval << endl;
+    qDebug() << hp << " " << atk << " " << def << " " << interval << endl;
 }
 
-void Hitmonlee::attack()
+int pokemon::getHp()
 {
-    cout << "Hitmonlee : \"Hit!\"";
+    return hp;
 }
 
-void Charmander::attack()
+int pokemon::getFullHp()
 {
-    cout << "Charmander : \"Fire!\"";
+    return fullhp;
 }
 
-void Squirtle::attack()
+int pokemon::getLvl()
 {
-    cout << "Squirtle : \"Taste my water!\"";
+    return level;
 }
 
-void Licktung::attack()
+int pokemon::getExp()
 {
-    cout << "Licktung : \"Lick, lick!\"";
+    return exp;
 }
 
-void Muk::attack()
+int pokemon::getTimer()
 {
-    cout << "Muk : \"Eat my gross muk!\"";
+    if(timer > 0)
+    {
+        timer--;
+        return timer + 1;
+    }
+    else
+    {
+        setState(0);
+        return 0;
+    }
 }
 
-void Krabby::attack()
+void pokemon::setTimer(int setting)
 {
-    cout << "Krabby : \"No one can live under my claw!\"";
+    timer = setting;
 }
 
-void Geodude::attack()
+int pokemon::getState()
 {
-    cout << "Geodude : \"Stone power!\"";
+    return state;
 }
 
-void Shellder::attack()
+void pokemon::setState(int which)
 {
-    cout << "Shellder : \"Shield smash!\"";
+    state = which;
 }
 
-void Onix::attack()
+QString str_pkm::skill()
 {
-    cout << "Onix : \"You will die for your arrogance!\"";
+    setTimer(3);
+    setState(3);
+    return "英勇打击！";
 }
 
-void Bulbasaur::attack()
+QString fat_pkm::skill()
 {
-    cout << "Bulbasaur : \"Eat my seed!\"";
+    gainHp(damagecost() * 2);
+    return "生命汲取！";
 }
 
-void Pidgeotto::attack()
+QString def_pkm::skill()
 {
-    cout << "Pidgeotto : \"Can you defend my air attack?\"";
+    setState(2);
+    setTimer(3);
+    return "石化表皮!";
 }
 
-void Pikachu::attack()
+QString agi_pkm::skill()
 {
-    cout << "Pikachu : \"Pika pika!\"";
+    return "眩晕！";
 }
 
+Hitmonlee::Hitmonlee(int lvl,int exp)
+{
+    changetype(1);
+    changeName("Hitmonlee");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Charmander::Charmander(int lvl,int exp)
+{
+    changetype(1);
+    changeName("Charmander");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Squirtle::Squirtle(int lvl,int exp)
+{
+    changetype(1);
+    changeName("Squirtle");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Licktung::Licktung(int lvl,int exp)
+{
+    changetype(2);
+    changeName("Licktung");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Muk::Muk(int lvl,int exp)
+{
+    changetype(2);
+    changeName("Muk");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Krabby::Krabby(int lvl,int exp)
+{
+    changetype(2);
+    changeName("Krabby");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Geodude::Geodude(int lvl,int exp)
+{
+    changetype(3);
+    changeName("Geodude");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Shellder::Shellder(int lvl,int exp)
+{
+    changetype(3);
+    changeName("Shellder");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Onix::Onix(int lvl,int exp)
+{
+    changetype(3);
+    changeName("Onix");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Bulbasaur::Bulbasaur(int lvl,int exp)
+{
+    changetype(4);
+    changeName("Bulbasaur");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Pidgeotto::Pidgeotto(int lvl,int exp)
+{
+    changetype(4);
+    changeName("Pidgeotto");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+Pikachu::Pikachu(int lvl,int exp)
+{
+    changetype(4);
+    changeName("Pikachu");
+    for(int i = 1; i < lvl; i++)
+        lvlup();
+    this->expup(exp);
+}
+
+QString Hitmonlee::attack()
+{
+    return "Hit!";
+}
+
+QString Charmander::attack()
+{
+    return "Fire!";
+}
+
+QString Squirtle::attack()
+{
+    return "Taste my water!";
+}
+
+QString Licktung::attack()
+{
+    return "Lick, lick!";
+}
+
+QString Muk::attack()
+{
+    return "Eat my gross muk!";
+}
+
+QString Krabby::attack()
+{
+    return "No one can live under my claw!";
+}
+
+QString Geodude::attack()
+{
+    return "Stone power!";
+}
+
+QString Shellder::attack()
+{
+    return "Shield smash!";
+}
+
+QString Onix::attack()
+{
+    return "You will die for your arrogance!";
+}
+
+QString Bulbasaur::attack()
+{
+    return "Eat my seed!";
+}
+
+QString Pidgeotto::attack()
+{
+    return "Can you defend my air attack?";
+}
+
+QString Pikachu::attack()
+{
+    return "Pika pika!";
+}
+/*
 pokemon* chooseyourpet()
 {
     int type = 0;
@@ -283,14 +462,14 @@ pokemon* chooseyourpet()
     pokemon *born;
     while(((type != 1)&&(type != 2)&&(type != 3)&&(type != 4))||(specy == 4))
     {
-        cout << "Now you can choose one pokemon." << endl << "Which type do you want?" << endl << "Press 1 for strong type, 2 for fat type, 3 for defence type, and 4 for agile type: " ;
+        qDebug() << "Now you can choose one pokemon." << endl << "Which type do you want?" << endl << "Press 1 for strong type, 2 for fat type, 3 for defence type, and 4 for agile type: " ;
         cin >> type;
-        cout << "I got it!" << endl;
+        qDebug() << "I got it!" << endl;
         if(type == 1)
         {
             while((specy != 1)&&(specy != 2)&&(specy != 3)&&(specy != 4))
             {
-                cout << "Which pokemon do you want? Press 1 for Hitmonlee, 2 for Charmander, 3 for Squirtle, 4 to re-choose the type: " ;
+                qDebug() << "Which pokemon do you want? Press 1 for Hitmonlee, 2 for Charmander, 3 for Squirtle, 4 to re-choose the type: " ;
                 cin >> specy;
                 if(specy == 1)
                     born = new Hitmonlee;
@@ -309,7 +488,7 @@ pokemon* chooseyourpet()
         {
             while((specy != 1)&&(specy != 2)&&(specy != 3)&&(specy != 4))
             {
-                cout << "Which pokemon do you want? Press 1 for Licktung, 2 for Muk, 3 for Krabby, 4 to re-choose the type: " ;
+                qDebug() << "Which pokemon do you want? Press 1 for Licktung, 2 for Muk, 3 for Krabby, 4 to re-choose the type: " ;
                 cin >> specy;
                 if(specy == 1)
                     born = new Licktung;
@@ -327,7 +506,7 @@ pokemon* chooseyourpet()
         {
             while((specy != 1)&&(specy != 2)&&(specy != 3)&&(specy != 4))
             {
-                cout << "Which pokemon do you want? Press 1 for Geodude, 2 for Shellder, 3 for Onix, 4 to re-choose the type: " ;
+                qDebug() << "Which pokemon do you want? Press 1 for Geodude, 2 for Shellder, 3 for Onix, 4 to re-choose the type: " ;
                 cin >> specy;
                 if(specy == 1)
                     born = new Geodude;
@@ -345,7 +524,7 @@ pokemon* chooseyourpet()
         {
             while((specy != 1)&&(specy != 2)&&(specy != 3)&&(specy != 4))
             {
-                cout << "Which pokemon do you want? Press 1 for Bulbarsaur, 2 for Pidgeotto, 3 for Pikachu, 4 to re-choose the type: " ;
+                qDebug() << "Which pokemon do you want? Press 1 for Bulbarsaur, 2 for Pidgeotto, 3 for Pikachu, 4 to re-choose the type: " ;
                 cin >> specy;
                 if(specy == 1)
                     born = new Bulbasaur;
@@ -365,9 +544,9 @@ pokemon* chooseyourpet()
     return born;
 }
 
-/*int main()
+int main()
 {
-    cout << "This is the test version 0.0.1" << endl;
+    qDebug() << "This is the test version 0.0.1" << endl;
     pokemon *a,*b;
     a = chooseyourpet();
     b = chooseyourpet();

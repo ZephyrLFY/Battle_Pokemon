@@ -17,17 +17,15 @@ class Newuser : public QDialog
 public:
     explicit Newuser(QWidget *parent = nullptr);
     ~Newuser();
-
+    void success();
+    void failed();
+signals:
+    void logon(QList<QString>&);
 private slots:
+    void isOrNot(int flag);
     void on_loginBtn_clicked();
-
-    void dealDatagram();
-
 private:
     Ui::Newuser *ui;
-    QUdpSocket *sender;
-    QUdpSocket *receiver;
-    bool flag;
 };
 
 #endif // NEWUSER_H

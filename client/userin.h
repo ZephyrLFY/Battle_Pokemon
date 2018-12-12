@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QSqlQuery>
 #include <QtNetwork>
+#include <QList>
 #include <unistd.h>
 
 namespace Ui {
@@ -19,16 +20,16 @@ public:
     explicit UserIn(QWidget *parent = nullptr);
     ~UserIn();
 
+    void success();
+    void failed(int which);
+signals:
+    void login(QList<QString>&);
 private slots:
     void on_loginBtn_clicked();
-
-    void dealDatagram();
+    void isOrNot(int flag);
 
 private:
     Ui::UserIn *ui;
-    QUdpSocket *sender;
-    QUdpSocket *receiver;
-    int tOrF = 4;
 };
 
 #endif // USERIN_H

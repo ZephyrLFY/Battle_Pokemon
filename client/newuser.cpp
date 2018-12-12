@@ -1,5 +1,6 @@
 #include "newuser.h"
 #include "ui_newuser.h"
+#include "wideuse.h"
 
 Newuser::Newuser(QWidget *parent) :
     QDialog(parent),
@@ -7,51 +8,53 @@ Newuser::Newuser(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->usrLineEdit->setFocus();
-    sender = new QUdpSocket(this);
-    receiver = new QUdpSocket(this);
-    receiver->bind(45454,QUdpSocket::ShareAddress);
-    connect(receiver,SIGNAL(readyRead()),
-    this,SLOT(dealDatagram()));
 }
 
 Newuser::~Newuser()
 {
-    delete sender;
-    delete receiver;
     delete ui;
-}
-
-void Newuser::dealDatagram()
-{
-    while(receiver->hasPendingDatagrams())
-    {
-       QByteArray datagram;
-       datagram.resize(receiver->pendingDatagramSize());
-       receiver->readDatagram(datagram.data(),datagram.size());
-       QString flag(datagram);
-       this->flag = flag.toInt();
-    }
 }
 
 void Newuser::on_loginBtn_clicked()
 {
-    QString msg = "2";
-    sender->writeDatagram(msg.toUtf8(),QHostAddress::Broadcast,45454);
-    sleep(1);
-    sender->writeDatagram(ui->usrLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
-    sleep(1);
-    sender->writeDatagram(ui->pwdLineEdit->text().toUtf8(),QHostAddress::Broadcast,45454);
-    if(flag)
+    QString name = ui->usrLineEdit->text();
+    QString pwd = ui->pwdLineEdit->text();
+    if(name.isEmpty() || pwd.isEmpty())
     {
-        extern QString usrName;
-        usrName = ui->usrLineEdit->text().toUtf8();
-        accept();
-    }
-    else
-    {
-        QMessageBox::warning(this, tr("警告！"),tr("该用户名已被注册！"),QMessageBox::Yes);
+        QMessageBox::warning(this, tr("警告！"),tr("用户名或密码不能为空！"),QMessageBox::Yes);
         ui->usrLineEdit->clear();
         ui->pwdLineEdit->clear();
         ui->usrLineEdit->setFocus();
     }
+    else
+    {
+        QList<QString> log;
+        log << "2" << name << pwd;
+        emit logon(log);
+    }
+
+}
+
+void Newuser::isOrNot(int flag)
+{
+    if(flag)
+        success();
+    else
+        failed();
+}
+
+void Newuser::success()
+{
+    QString usrName = ui->usrLineEdit->text().toUtf8();
+    localUser = new localUsr(usrName);
+
+    accept();
+}
+
+void Newuser::failed()
+{
+    QMessageBox::warning(this, tr("警告！"),tr("该用户名已被注册！"),QMessageBox::Yes);
+    ui->usrLineEdit->clear();
+    ui->pwdLineEdit->clear();
+    ui->usrLineEdit->setFocus();
 }
